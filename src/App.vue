@@ -9,7 +9,8 @@ import {
   ViewfinderCircleIcon,
 } from "@heroicons/vue/24/outline";
 import Navigation from "./Elements/Navigation.vue";
-import SidebarContent from "./Elements/SidebarContent.vue";
+import SidebarContent from "./Elements/FileManager.vue";
+import TextField from "./Elements/TextField.vue";
 
 const appWindow = getCurrentWindow();
 
@@ -71,18 +72,21 @@ onMounted(() => {
     </div>
 
     <div
-      class="sidebar overflow-y-scroll top-8 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
+      class="sidebar overflow-hidden top-8 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
     >
       <div><SidebarContent class="text-[#FDF0D5] font-quickSand" /></div>
     </div>
     <div
-      class="content flex-1 w-full ml-[19vw] p-4 h-[calc(100vh-32px)] overflow-y-auto"
+      class="content flex-1 w-full  mt-8 h-[calc(100vh-32px)] bg-black p-4 overflow-hidden flex items-center justify-center"
     >
+      <TextField class="w-full max-w-4xl px-4 h-full overflow-auto flex items-center justify-center " />
+
       <ViewfinderCircleIcon
         @click="openDirLocation"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"
       />
-      <Navigation />
+
+      <Navigation class="fixed z-1000"/>
     </div>
   </main>
 </template>
@@ -90,7 +94,11 @@ onMounted(() => {
 <style scoped>
 * {
   user-select: none;
+
   pointer-events: auto;
+}
+html, body {
+  overflow: hidden;
 }
 
 .logo.vite:hover {
@@ -107,7 +115,7 @@ onMounted(() => {
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
-
+  overflow: hidden;
   color: #0f0f0f;
 
   font-synthesis: none;
