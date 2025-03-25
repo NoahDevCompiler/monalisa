@@ -23,7 +23,8 @@ pub fn run() {
             minimize_window,
             maximize_window,
             close_window,
-            fs_manager::create_folder
+            fs_manager::create_folder,
+            fs_manager::create_md_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

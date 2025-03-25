@@ -58,4 +58,6 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     Ok(())
 }
 
+//pub fn load_vault()
+
 //pub fn save_active_file() -> {}
