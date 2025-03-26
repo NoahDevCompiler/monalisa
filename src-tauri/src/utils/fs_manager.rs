@@ -1,8 +1,8 @@
-use std::fmt::format;
 use std::fs;
 use std::path::PathBuf;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
+use serde_json::to_string;
 
 pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     let vault_path = app_handle
@@ -47,14 +47,22 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     }
     //if file exists err, creation Error
 
-    let file_path = match name{
-        Some(n) => vault_path.join(n),
-        None => return Err(format!("File name empty")),
+    let file_name = match name{
+        Some(n) if !n.trim().is_empty() => n.trim(),
+        _ => return Err(format!("File name empty")),
     };
 
-    if let Err(e) = fs::File::create(&file_path) {
-        return Err(format!("Couldnt create File {}", e));
+    let file_name = if file_name.ends_with(".md"){
+        file_name.to_string()
+    } else {
+        format!("{}.md", file_name)
+    };
+    let file_path = vault_path.join(file_name);
+
+    if file_path.exists() {
+        return Err("File already exists".to_string());
     }
+    fs::File::create(&file_path).map_err(|e| format!("Couldnt create file {}", e))?;
     Ok(())
 }
 

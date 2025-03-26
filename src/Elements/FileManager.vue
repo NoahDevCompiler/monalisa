@@ -7,27 +7,31 @@ import { invoke } from "@tauri-apps/api/core";
 import { treeNodeProps } from "element-plus/es/components/tree-v2/src/virtual-tree.mjs";
 
 //Give parameter of folder to backend to save node in parent folder
-//when i click the folder icon to create a new folder and i click inside the input and press enter leaving the input empty 
+//when i click the folder icon to create a new folder and i click inside the input and press enter leaving the input empty
 //the folder doesnt get created BUT after clicking the folder icon again no input appears to create a new folder
 
 const motionProps = ref({ animate: { scale: 1 } });
 const key = ref(false);
 const treeRef = ref<any>(null);
-  const selectedNode = ref<TreeNode | null>(null);
+const selectedNode = ref<TreeNode | null>(null);
 
 type TreeNode = {
   id: string;
   label: string;
   type: "folder" | "file";
+  path?: string;
   children?: TreeNode[];
   editing?: boolean;
 };
 
 const handleDrop = () => {
-  //calls when node dropped
-}
+};
+
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
+  if (selectedNode.value) {
+    info(selectedNode.value.label)
+  }
 };
 
 const focusInput = async (id: string) => {
@@ -39,32 +43,46 @@ const focusInput = async (id: string) => {
   }
 };
 
-async function addFolder(node: TreeNode | null) {
+async function addFolder() {
   const parent =
     selectedNode.value?.type === "folder"
       ? selectedNode.value.children
       : treeData.value;
 
+  const parentPath =
+    selectedNode.value?.type === "folder"
+      ? selectedNode.value.path || selectedNode.value.label
+      : "";
+
   const newNode: TreeNode = {
     id: Date.now().toString(),
     label: "",
     type: "folder",
+    path: parentPath,
     children: [],
     editing: true,
   };
   parent!.push(newNode);
   focusInput(newNode.id);
-
   info("clicked folder");
 }
 
-async function addFile(node: TreeNode | null) {
-  const parent = node?.children || treeData.value;
+async function addFile() {
+  const parent =
+    selectedNode.value?.type === "folder"
+      ? selectedNode.value.children
+      : treeData.value;
+
+  const parentPath =
+    selectedNode.value?.type === "folder"
+      ? selectedNode.value.path || selectedNode.value.label
+      : "";
 
   const newNode: TreeNode = {
     id: Date.now().toString(),
     label: "",
     type: "file",
+    path: parentPath,
     children: [],
     editing: true,
   };
@@ -82,16 +100,31 @@ const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
     if (parent) {
       parent.splice(parent.indexOf(node), 1);
     }
-    treeData.value = treeData.value.filter((n: TreeNode) => n.id !== node.id);
+    treeData.value = treeData.value.filter((n: TreeNode) => n.id !== node.id); //deletes node with id
     return;
   }
   try {
+    const parentPath =
+      selectedNode.value?.type === "folder"
+        ? selectedNode.value.path?.endsWith("/")
+          ? selectedNode.value.path.slice(0, -1)
+          : selectedNode.value.path || selectedNode.value.label
+        : "";
+
+    node.path = parentPath + `/${node.path}`;
+    if (selectedNode.value?.path) {
+      info("Selected node: ");
+      info(selectedNode.value?.path);
+      info("Node Path: ");
+      info(node.path);
+    }
     if (node.type == "folder") {
       await invoke("create_folder", { name: node.label });
       info("Folder created");
     } else if (node.type == "file") {
-      await invoke("create_md_file", { name: node.label });
+      await invoke("create_md_file", { name: node.label, folder: parentPath });
     }
+    info(node.path);
   } catch (error) {
     info("Error while creating");
   }
@@ -110,8 +143,8 @@ const treeData = ref<TreeNode[]>([]);
   <div
     class="icons top-0 gap-2 flex flex-row justify-center items-center text-[white]"
   >
-    <FolderPlusIcon @click="addFolder(null)" class="size-5 cursor-pointer" />
-    <PencilSquareIcon @click="addFile(null)" class="size-5 cursor-pointer" />
+    <FolderPlusIcon @click="addFolder()" class="size-5 cursor-pointer" />
+    <PencilSquareIcon @click="addFile()" class="size-5 cursor-pointer" />
   </div>
 
   <el-tree

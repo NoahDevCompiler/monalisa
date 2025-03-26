@@ -11,6 +11,8 @@ import {
 import Navigation from "./Elements/Navigation.vue";
 import SidebarContent from "./Elements/FileManager.vue";
 import TextField from "./Elements/TextField.vue";
+import { openSettingsWindow } from "./utils/windows";
+import { info } from "@tauri-apps/plugin-log";
 
 const appWindow = getCurrentWindow();
 
@@ -25,7 +27,15 @@ const maximize = async () => {
 const close = async () => {
   appWindow.close();
 };
-const openDirLocation = () => {};
+const openSettings = async () => {
+  try{
+    await openSettingsWindow();
+  }
+  catch(e){
+    info("Failed ")
+  }
+
+};
 
 onMounted(() => {
   const titlebar = document.getElementById("toolbar");
@@ -82,7 +92,7 @@ onMounted(() => {
       <TextField class="w-full max-w-4xl px-4 h-full overflow-auto flex items-center justify-center " />
 
       <ViewfinderCircleIcon
-        @click="openDirLocation"
+        @click="openSettings"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"
       />
 
