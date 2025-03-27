@@ -8,12 +8,12 @@ import {
   XMarkIcon,
   ViewfinderCircleIcon,
 } from "@heroicons/vue/24/outline";
-import Navigation from "./Elements/Navigation.vue";
-import SidebarContent from "./Elements/FileManager.vue";
-import TextField from "./Elements/TextField.vue";
+import Navigation from "./Components/Navigation.vue";
+import SidebarContent from "./Components/FileManager.vue";
+import TextField from "./Components/TextField.vue";
 import { openSettingsWindow } from "./utils/windows";
 import { info } from "@tauri-apps/plugin-log";
-
+import Header from "./Components/Header.vue";
 const appWindow = getCurrentWindow();
 
 const minimize = async () => {
@@ -37,49 +37,30 @@ const openSettings = async () => {
 
 };
 
-onMounted(() => {
-  const titlebar = document.getElementById("toolbar");
-
-  if (titlebar) {
-    titlebar.addEventListener("mousedown", (e) => {
-      const clickedElement = e.target as HTMLElement;
-      if (
-        clickedElement.tagName !== "BUTTON" &&
-        !clickedElement.closest("button")
-      ) {
-        if (e.buttons === 1) {
-          e.detail === 2
-            ? appWindow.toggleMaximize()
-            : appWindow.startDragging();
-        }
-      }
-    });
-  }
-});
+//onMounted(() => {
+//  const titlebar = document.getElementById("toolbar");
+//
+//  if (titlebar) {
+//    titlebar.addEventListener("mousedown", (e) => {
+//      const clickedElement = e.target as HTMLElement;
+//      if (
+//        clickedElement.tagName !== "BUTTON" &&
+//        !clickedElement.closest("button")
+//      ) {
+//        if (e.buttons === 1) {
+//          e.detail === 2
+//            ? appWindow.toggleMaximize()
+//            : appWindow.startDragging();
+//        }
+//      }
+//    });
+//  }
+//});
 </script>
 
 <template>
   <main class="flex">
-    <div
-      class="toolbar fixed top-0 left-0 w-full h-8 flex items-center bg-[#3A3A3A] justify-between z-10 select-none"
-      id="toolbar"
-    >
-      <div class="flex items-center space-x-4">
-        <button class="text-white">Weitere Links</button>
-      </div>
-
-      <div class="flex items-center space-x-4">
-        <button @click="minimize" class="text-white hover:bg-slate-400">
-          <MinusIcon class="size-5" />
-        </button>
-        <button @click="maximize" class="text-white hover:bg-slate-400">
-          <StopIcon class="size-5" />
-        </button>
-        <button @click="close" class="text-white hover:bg-red-500">
-          <XMarkIcon class="size-5" />
-        </button>
-      </div>
-    </div>
+    <Header/>
 
     <div
       class="sidebar overflow-hidden top-8 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"

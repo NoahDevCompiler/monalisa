@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Main from '../App.vue'
-import Settings from '../Elements/SettingsWindow.vue';
+import Settings from '../Views/SettingsWindow.vue';
 
 const router = createRouter({
   history: createWebHistory(),

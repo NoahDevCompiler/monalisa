@@ -19,10 +19,10 @@ export async function openSettingsWindow() {
         height: 500,
         minWidth: 400,
         minHeight: 300,
-        decorations: false,
+        decorations: true,
         transparent: true,
         resizable: false,
-        center: true
+        center: true,
     });
 
     settingsWindow.once('tauri://created', () => {
@@ -40,9 +40,4 @@ export async function openSettingsWindow() {
       settingsWindow.once('tauri://close-requested', () => {
         settingsWindow = null;
       });
-
-      await webview.emit("some-event", "data");
-      // listen to an event from the backend
-      const unlisten = await webview.listen("event-name" => {settingsWindow?.close(), settingsWindow = null});
-      unlisten();
 }

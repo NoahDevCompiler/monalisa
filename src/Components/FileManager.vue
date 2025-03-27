@@ -14,6 +14,7 @@ const motionProps = ref({ animate: { scale: 1 } });
 const key = ref(false);
 const treeRef = ref<any>(null);
 const selectedNode = ref<TreeNode | null>(null);
+const isSaving = ref(false);
 
 type TreeNode = {
   id: string;
@@ -24,13 +25,12 @@ type TreeNode = {
   editing?: boolean;
 };
 
-const handleDrop = () => {
-};
+const handleDrop = () => {};
 
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
   if (selectedNode.value) {
-    info(selectedNode.value.label)
+    info(selectedNode.value.label);
   }
 };
 
@@ -70,7 +70,7 @@ async function addFolder() {
 async function addFile() {
   const parent =
     selectedNode.value?.type === "folder"
-      ? selectedNode.value.children
+      ? selectedNode.value.children || treeData.value
       : treeData.value;
 
   const parentPath =
@@ -93,6 +93,9 @@ async function addFile() {
 }
 
 const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
+  if (isSaving.value) return;
+  isSaving.value = true;
+
   node.editing = false;
   node.label = node.label.trim();
 
@@ -105,28 +108,25 @@ const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
   }
   try {
     const parentPath =
-      selectedNode.value?.type === "folder"
-        ? selectedNode.value.path?.endsWith("/")
-          ? selectedNode.value.path.slice(0, -1)
-          : selectedNode.value.path || selectedNode.value.label
-        : "";
-
-    node.path = parentPath + `/${node.path}`;
-    if (selectedNode.value?.path) {
-      info("Selected node: ");
-      info(selectedNode.value?.path);
-      info("Node Path: ");
-      info(node.path);
+      selectedNode.value?.type === "folder" ? selectedNode.value.path : "";
+    if (parentPath) {
+      info("Selected parent node path: ");
+      info(parentPath);
     }
+    node.path = parentPath + node.label + "/";
+
     if (node.type == "folder") {
       await invoke("create_folder", { name: node.label });
       info("Folder created");
     } else if (node.type == "file") {
       await invoke("create_md_file", { name: node.label, folder: parentPath });
     }
+    info("CREATED NODE PATH:");
     info(node.path);
   } catch (error) {
     info("Error while creating");
+  } finally {
+    isSaving.value = false;
   }
 };
 const handleDoubleClick = (data: TreeNode) => {
@@ -136,6 +136,7 @@ const handleDoubleClick = (data: TreeNode) => {
     return false;
   }
 };
+
 const treeData = ref<TreeNode[]>([]);
 </script>
 
