@@ -4,6 +4,9 @@ use std::path::PathBuf;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 use serde_json::to_string;
+use notify::Watcher;
+use std::sync::mpsc::channel;
+use std::thread::spawn;
 
 //global vault value for the active or last active vault path
 
@@ -75,7 +78,7 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     Ok(())
 }
 
-pub fn syncrhon
+pub fn synchronious() -> 
 //pub fn load_vault()
 
 //pub fn save_active_file() -> {}
