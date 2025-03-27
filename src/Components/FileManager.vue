@@ -14,7 +14,7 @@ const motionProps = ref({ animate: { scale: 1 } });
 const key = ref(false);
 const treeRef = ref<any>(null);
 const selectedNode = ref<TreeNode | null>(null);
-const isSaving = ref(false);
+const isSaving = ref(false)
 
 type TreeNode = {
   id: string;
@@ -30,7 +30,7 @@ const handleDrop = () => {};
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
   if (selectedNode.value) {
-    info(selectedNode.value.label);
+    //info(selectedNode.value.label);
   }
 };
 
@@ -64,7 +64,7 @@ async function addFolder() {
   };
   parent!.push(newNode);
   focusInput(newNode.id);
-  info("clicked folder");
+  //info("clicked folder");
 }
 
 async function addFile() {
@@ -89,12 +89,15 @@ async function addFile() {
   parent!.push(newNode);
   focusInput(newNode.id);
 
-  info("clicked file");
+  //info("clicked file");
 }
 
 const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
-  if (isSaving.value) return;
+  if(isSaving.value){
+    return
+  }
   isSaving.value = true;
+  info("Called SaveNode")
 
   node.editing = false;
   node.label = node.label.trim();
@@ -104,28 +107,29 @@ const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
       parent.splice(parent.indexOf(node), 1);
     }
     treeData.value = treeData.value.filter((n: TreeNode) => n.id !== node.id); //deletes node with id
+    isSaving.value = false;
     return;
   }
   try {
     const parentPath =
       selectedNode.value?.type === "folder" ? selectedNode.value.path : "";
     if (parentPath) {
-      info("Selected parent node path: ");
-      info(parentPath);
+      //info("Selected parent node path: ");
+      //info(parentPath);
     }
     node.path = parentPath + node.label + "/";
 
     if (node.type == "folder") {
-      await invoke("create_folder", { name: node.label });
+      await invoke("create_folder", { name: node.label, folder: parentPath });
       info("Folder created");
     } else if (node.type == "file") {
       await invoke("create_md_file", { name: node.label, folder: parentPath });
     }
-    info("CREATED NODE PATH:");
-    info(node.path);
+    //info("CREATED NODE PATH:");
+    //info(node.path);
   } catch (error) {
-    info("Error while creating");
-  } finally {
+    //info("Error while creating");
+  } finally{
     isSaving.value = false;
   }
 };

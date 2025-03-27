@@ -1,8 +1,12 @@
+use std::fmt::format;
 use std::fs;
 use std::path::PathBuf;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 use serde_json::to_string;
+
+//global vault value for the active or last active vault path
+
 
 pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     let vault_path = app_handle
@@ -23,17 +27,22 @@ pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String>
 }
 
 #[tauri::command]
-pub fn create_folder(app_handle: AppHandle, name: Option<&str>) -> Result<(), String> {
-    let vault_path = get_default_vault_path(&app_handle)?;
+pub fn create_folder(app_handle: AppHandle, name: Option<&str>, folder: Option<&str>) -> Result<(), String> {
+    let mut vault_path = get_default_vault_path(&app_handle)?;
+
+    if let Some(folder_name) = folder {
+        vault_path = vault_path.join(folder_name)
+    }
 
     let folder_path = match name {
         Some(n) => vault_path.join(n),
         None => vault_path,
     };
-    if !folder_path.exists() {
-        if let Err(e) = fs::create_dir(&folder_path) {
-            return Err(format!("Couldnt create folder {}", e));
-        }
+    if folder_path.exists() {
+        return Err("Folder already exists".to_string());
+    }
+    if let Err(e) = fs::create_dir(&folder_path) {
+        return Err(format!("Couldnt create folder {}", e));
     }
 
     Ok(())
@@ -66,6 +75,7 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     Ok(())
 }
 
+pub fn syncrhon
 //pub fn load_vault()
 
 //pub fn save_active_file() -> {}
