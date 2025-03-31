@@ -14,7 +14,7 @@ const motionProps = ref({ animate: { scale: 1 } });
 const key = ref(false);
 const treeRef = ref<any>(null);
 const selectedNode = ref<TreeNode | null>(null);
-const isSaving = ref(false)
+const isSaving = ref(false);
 
 type TreeNode = {
   id: string;
@@ -93,11 +93,11 @@ async function addFile() {
 }
 
 const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
-  if(isSaving.value){
-    return
+  if (isSaving.value) {
+    return;
   }
   isSaving.value = true;
-  info("Called SaveNode")
+  info("Called SaveNode");
 
   node.editing = false;
   node.label = node.label.trim();
@@ -129,7 +129,7 @@ const saveNode = async (node: TreeNode, parent?: TreeNode[]) => {
     //info(node.path);
   } catch (error) {
     //info("Error while creating");
-  } finally{
+  } finally {
     isSaving.value = false;
   }
 };
@@ -174,6 +174,27 @@ const treeData = ref<TreeNode[]>([]);
             <path
               fill="currentColor"
               d="M128 192v640h768V320H485.76L357.504 192H128zm-32-64h287.872l128.384 128H928a32 32 0 0 1 32 32v576a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V160a32 32 0 0 1 32-32z"
+            />
+          </svg>
+        </el-icon>
+        <el-icon v-if="data.type === 'file'">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100"
+            height="100"
+            viewBox="0 0 40 40"
+          >
+            <path
+              stroke="#000"
+              stroke-width="1.25"
+              fill="none"
+              d="M6.5 2.5h18.293L33.5 11.207V37.5H6.5z"
+            />
+            <path
+              stroke="#000"
+              stroke-width="1.25"
+              fill="none"
+              d="M24.5 2.5v9h"
             />
           </svg>
         </el-icon>

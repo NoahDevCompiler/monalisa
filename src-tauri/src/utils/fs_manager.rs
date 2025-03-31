@@ -1,12 +1,20 @@
 use std::fmt::format;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{
+    Path,
+    PathBuf
+};
+use std::str::SplitWhitespace;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
-use serde_json::to_string;
-use notify::Watcher;
+use notify::{
+    Config,
+    RecommendedWatcher,
+    Watcher,
+    RecursiveMode
+};
 use std::sync::mpsc::channel;
-use std::thread::spawn;
+use std::thread::{park, spawn};
 
 //global vault value for the active or last active vault path
 
@@ -78,7 +86,17 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     Ok(())
 }
 
-pub fn synchronious() -> 
-//pub fn load_vault()
+pub fn sync_vault(path: PathBuf) {
+    let (tx, rx) = channel();
+    
+    let path = path.to_path_buf();
+    spawn(move ||{
+        let mut watcher = RecommendedWatcher::new(tx, Config::default()).unwrap();
+        watcher.watch(&path, RecursiveMode::Recursive).unwrap();
+        
+        loop {
+            park();
+        }
+    });
 
-//pub fn save_active_file() -> {}
+}

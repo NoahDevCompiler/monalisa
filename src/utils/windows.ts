@@ -20,7 +20,6 @@ export async function openSettingsWindow() {
         minWidth: 400,
         minHeight: 300,
         decorations: true,
-        transparent: true,
         resizable: false,
         center: true,
     });

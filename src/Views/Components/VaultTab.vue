@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-center justify-center">
     <img
-      src="../../../public/monalisalogo.png"
+      src="/monalisalogo.png"
       class="w-[30vw] h-auto max-w-[300px] min-w-[150px]"
     />
     <div class="gap-3 flex flex-col">
