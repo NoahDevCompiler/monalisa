@@ -1,23 +1,14 @@
+use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fmt::format;
 use std::fs;
-use std::path::{
-    Path,
-    PathBuf
-};
+use std::path::{Path, PathBuf};
 use std::str::SplitWhitespace;
-use tauri::path::BaseDirectory;
-use tauri::{AppHandle, Manager};
-use notify::{
-    Config,
-    RecommendedWatcher,
-    Watcher,
-    RecursiveMode
-};
 use std::sync::mpsc::channel;
 use std::thread::{park, spawn};
+use tauri::path::BaseDirectory;
+use tauri::{AppHandle, Emitter, Manager};
 
 //global vault value for the active or last active vault path
-
 
 pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     let vault_path = app_handle
@@ -38,7 +29,11 @@ pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String>
 }
 
 #[tauri::command]
-pub fn create_folder(app_handle: AppHandle, name: Option<&str>, folder: Option<&str>) -> Result<(), String> {
+pub fn create_folder(
+    app_handle: AppHandle,
+    name: Option<&str>,
+    folder: Option<&str>,
+) -> Result<(), String> {
     let mut vault_path = get_default_vault_path(&app_handle)?;
 
     if let Some(folder_name) = folder {
@@ -59,7 +54,11 @@ pub fn create_folder(app_handle: AppHandle, name: Option<&str>, folder: Option<&
     Ok(())
 }
 #[tauri::command]
-pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<&str>) -> Result<(), String> {
+pub fn create_md_file(
+    app_handle: AppHandle,
+    name: Option<&str>,
+    folder: Option<&str>,
+) -> Result<(), String> {
     let mut vault_path = get_default_vault_path(&app_handle)?;
 
     if let Some(folder_name) = folder {
@@ -67,12 +66,12 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     }
     //if file exists err, creation Error
 
-    let file_name = match name{
+    let file_name = match name {
         Some(n) if !n.trim().is_empty() => n.trim(),
         _ => return Err(format!("File name empty")),
     };
 
-    let file_name = if file_name.ends_with(".md"){
+    let file_name = if file_name.ends_with(".md") {
         file_name.to_string()
     } else {
         format!("{}.md", file_name)
@@ -86,17 +85,28 @@ pub fn create_md_file(app_handle: AppHandle, name: Option<&str>, folder: Option<
     Ok(())
 }
 
-pub fn sync_vault(path: PathBuf) {
+#[tauri::command]
+pub fn sync_vault(app_handle: AppHandle, path: PathBuf) {
     let (tx, rx) = channel();
-    
+
     let path = path.to_path_buf();
-    spawn(move ||{
+    spawn(move || {
         let mut watcher = RecommendedWatcher::new(tx, Config::default()).unwrap();
         watcher.watch(&path, RecursiveMode::Recursive).unwrap();
-        
+
         loop {
             park();
+            for res in &rx {
+                match &res {
+                    Ok(event) => {
+                        let serialized = serde_json::to_string(&event).unwrap();
+                        app_handle.emit("", event);
+                    },
+                    Err(e) => {
+                        app_handle.emit("error", &e)
+                    }
+                };
+            }
         }
     });
-
 }

@@ -1,59 +1,78 @@
-<script setup>
-import Prism from "prismjs";
-import "prismjs/components/prism-csharp.js";
-import "prismjs/components/prism-rust.js";
-import "prismjs/components/prism-python.js";
-import "prismjs/components/prism-javascript";
-import { marked } from "marked";
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { EditorView, Decoration, WidgetType, MatchDecorator, DecorationSet, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { minimalSetup } from "codemirror";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { tags } from "@lezer/highlight";
+import { oneDark } from "@codemirror/theme-one-dark";
 
-const inputText = ref("#Untitled");
+const editorEl = ref(null);
 
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-  sanitize: true, 
-  smartypants: true
-});
 
-const renderedMarkdown = computed(() => {
-  return marked(inputText.value)
+const markdownHighlight = HighlightStyle.define([
+  {
+    tag: tags.heading1,
+    fontSize: "1.7em",
+    fontWeight: "bold",
+    color: "#ff5e62",
+  },
+  {
+    tag: tags.heading2,
+    fontSize: "1.4em",
+    fontWeight: "bold",
+    color: "#ff9966",
+  },
+  {
+    tag: tags.heading3,
+    fontSize: "1.2em",
+    fontWeight: "bold",
+    color: "#ffcc66",
+  },
+  { tag: tags.monospace, fontFamily: "monospace" },
+]);
+
+onMounted(() => {
+  new EditorView({
+    doc: "# Start writing here...",
+    extensions: [
+      minimalSetup,
+      markdown(),
+      oneDark,
+      syntaxHighlighting(markdownHighlight),
+      EditorView.lineWrapping,
+    ],
+    parent: editorEl.value,
+  });
 });
 </script>
 
 <template>
-  <textarea
-    v-html="compiledMarkdown"
-    v-model="inputText"
-    class="resize-none border-none focus:outline-none bg-black text-white p-2"
-  ></textarea>
-  <div class="preview" v-html="inputText"></div>
+  <div ref="editorEl" class="absolute whitespace-pre-wrap break-all top-8" />
 </template>
 
-<style scoped>
-.editor-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  height: 100vh;
-  padding: 16px;
+<style>
+.cm-editor {
+  height: 100vh !important;
+  background: transparent;
+  overflow: hidden;
+  padding-top: 60px;
+  padding-left: 60px;
 }
-
-.editor, .preview {
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+@media (min-width: 1024px) {
+  .cm-editor {
+    padding-left: 140px !important;
+  }
 }
-
-.editor {
-  background: #f8f8f8;
-  resize: none;
+.cm-scroller {
+  height: 100% !important;
+  width: 100% !important;
+  overflow: auto !important;
 }
-
-.preview {
-  overflow-y: auto;
+.cm-content {
+  text-align: left;
+}
+.cm-line {
+  height: auto !important;
 }
 </style>
-  

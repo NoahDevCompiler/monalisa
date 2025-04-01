@@ -10,11 +10,17 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@codemirror/highlight": "^0.19.8",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.36.5",
     "@heroicons/vue": "^2.2.0",
     "@tauri-apps/api": "^2.3.0",
     "@tauri-apps/plugin-log": "^2.3.1",
     "@tauri-apps/plugin-opener": "^2",
     "@vueuse/motion": "^3.0.3",
+    "codemirror": "^6.0.1",
     "element-plus": "^2.9.6",
     "prismjs": "^1.30.0",
     "vue": "^3.5.13",
@@ -23,6 +29,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.8",
     "@tauri-apps/cli": "^2",
+    "@types/marked": "^6.0.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.4.49",

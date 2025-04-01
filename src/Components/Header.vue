@@ -4,6 +4,7 @@ import { MinusIcon, StopIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { onMounted, ref } from "vue";
 import type { WebviewWindow as WebviewWindowType } from "@tauri-apps/api/webviewWindow";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import TabManager from "./TabManager.vue";
 
 const props = defineProps({
   windowLabel: {
@@ -66,14 +67,10 @@ onMounted(() => {
 
 <template>
   <div
-    class="toolbar fixed top-0 left-0 w-full h-8 flex items-center bg-[#3A3A3A] justify-between z-10 select-none"
-    id="toolbar"
+    class="toolbar fixed top-0 left-0 w-full h-8 flex bg-[#3A3A3A] justify-between z-10 select-none"
   >
-    <div class="flex items-center space-x-4">
-      <button class="text-white">Weitere Links</button>
-    </div>
-
-    <div class="flex items-center space-x-4">
+    <div class=""></div>
+    <div class="flex items-center justify-end right-0 space-x-4">
       <button @click="minimize" class="text-white hover:bg-slate-400">
         <MinusIcon class="size-5" />
       </button>

@@ -14,28 +14,29 @@ import TextField from "./Components/TextField.vue";
 import { openSettingsWindow } from "./utils/windows";
 import { info } from "@tauri-apps/plugin-log";
 import Header from "./Components/Header.vue";
+
 const appWindow = getCurrentWindow();
 
-const minimize = async () => {
-  appWindow.minimize();
-};
-
-const maximize = async () => {
-  appWindow.toggleMaximize();
-};
-
-const close = async () => {
-  appWindow.close();
-};
-const openSettings = async () => {
-  try{
-    await openSettingsWindow();
-  }
-  catch(e){
-    info("Failed ")
-  }
-
-};
+//const minimize = async () => {
+//  appWindow.minimize();
+//};
+//
+//const maximize = async () => {
+//  appWindow.toggleMaximize();
+//};
+//
+//const close = async () => {
+//  appWindow.close();
+//};
+//const openSettings = async () => {
+//  try{
+//    await openSettingsWindow();
+//  }
+//  catch(e){
+//    info("Failed ")
+//  }
+//
+//};
 
 //onMounted(() => {
 //  const titlebar = document.getElementById("toolbar");
@@ -60,24 +61,22 @@ const openSettings = async () => {
 
 <template>
   <main class="flex">
-    <Header/>
+    <Header />
 
     <div
       class="sidebar overflow-hidden top-8 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
     >
       <div><SidebarContent class="text-[#FDF0D5] font-quickSand" /></div>
     </div>
-    <div
-      class="content flex-1 w-full  mt-8 h-[calc(100vh-32px)] bg-black p-4 overflow-hidden flex items-center justify-center"
-    >
-      <TextField class="w-full max-w-4xl px-4 h-full overflow-auto flex items-center justify-center " />
+    <div class="flex-1 relative">
+      <TextField class="absolute inset-0" />
 
       <ViewfinderCircleIcon
         @click="openSettings"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"
       />
 
-      <Navigation class="fixed z-1000"/>
+      <Navigation class="fixed z-1000" />
     </div>
   </main>
 </template>
@@ -88,7 +87,8 @@ const openSettings = async () => {
 
   pointer-events: auto;
 }
-html, body {
+html,
+body {
   overflow: hidden;
 }
 
