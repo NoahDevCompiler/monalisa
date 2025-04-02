@@ -2358,12 +2358,15 @@ version = "0.1.0"
 dependencies = [
  "config",
  "notify",
+ "once_cell",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-log",
  "tauri-plugin-opener",
+ "thiserror 2.0.12",
+ "walkdir",
 ]
 
 [[package]]
