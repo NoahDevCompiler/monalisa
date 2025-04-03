@@ -73,14 +73,14 @@ onMounted(() => {
     id="toolbar"
   >
     <div class=""></div>
-    <div class="flex items-center justify-end right-0 space-x-4">
-      <button @click="minimize" class="text-white hover:bg-slate-400">
+    <div class="flex items-center right-0">
+      <button @click="minimize" class="button text-white hover:bg-slate-400 h-full rounded-none">
         <MinusIcon class="size-5" />
       </button>
-      <button @click="maximize" class="text-white hover:bg-slate-400">
-        <StopIcon class="size-5" />
+      <button @click="maximize" class="button text-white hover:bg-slate-400 rounded-none h-full">
+        <StopIcon class="size-5" /> 
       </button>
-      <button @click="close" class="text-white hover:bg-red-500">
+      <button @click="close" class="button text-white hover:bg-red-500 rounded-none h-full">
         <XMarkIcon class="size-5" />
       </button>
     </div>
@@ -95,5 +95,13 @@ onMounted(() => {
   height: 30px;
   z-index: 9999; 
   -webkit-app-region: drag; 
+}
+.button {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  width: 36px;
+  border: none;
+  box-shadow: none;
 }
 </style>

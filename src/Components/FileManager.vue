@@ -146,7 +146,7 @@ const treeData = ref<TreeNode[]>([]);
 
 <template>
   <div
-    class="icons top-0 gap-2 flex flex-row justify-center items-center text-[white]"
+    class="icons gap-2 flex flex-row justify-center items-center text-[white]"
   >
     <FolderPlusIcon @click="addFolder()" class="size-5 cursor-pointer" />
     <PencilSquareIcon @click="addFile()" class="size-5 cursor-pointer" />
@@ -212,6 +212,13 @@ const treeData = ref<TreeNode[]>([]);
             data.label || (data.type === "folder" ? "New Folder" : "New File")
           }}
         </span>
+      </div>
+    </template>
+    <template #empty>
+      <div
+        class="pt-10 justify-center items-center flex font-quickSand text-xl"
+      >
+        Empty Vault
       </div>
     </template>
   </el-tree>

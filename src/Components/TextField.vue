@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { EditorView, Decoration, WidgetType, MatchDecorator, DecorationSet, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import {
+  EditorView,
+  Decoration,
+  WidgetType,
+  MatchDecorator,
+  DecorationSet,
+  ViewPlugin,
+  ViewUpdate,
+} from "@codemirror/view";
 import { minimalSetup } from "codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
@@ -8,7 +16,6 @@ import { tags } from "@lezer/highlight";
 import { oneDark } from "@codemirror/theme-one-dark";
 
 const editorEl = ref(null);
-
 
 const markdownHighlight = HighlightStyle.define([
   {
@@ -33,7 +40,7 @@ const markdownHighlight = HighlightStyle.define([
 ]);
 
 onMounted(() => {
-  new EditorView({
+  const view = new EditorView({
     doc: "# Start writing here...",
     extensions: [
       minimalSetup,
@@ -44,35 +51,68 @@ onMounted(() => {
     ],
     parent: editorEl.value,
   });
+
+  // Editor anpassen, damit Höhe richtig berechnet wird
+  setTimeout(() => {
+    view.requestMeasure();
+  }, 50);
 });
 </script>
 
 <template>
-  <div ref="editorEl" class="absolute whitespace-pre-wrap break-all top-8" />
+  <div class="editor-container">
+    <el-scrollbar class="scroll-container">
+      <div class="editor-wrapper">
+        <div ref="editorEl" class="editor-content" />
+      </div>
+    </el-scrollbar>
+  </div>
 </template>
 
 <style>
-.cm-editor {
-  height: 100vh !important;
-  background: transparent;
-  overflow: hidden;
-  padding-top: 60px;
+.editor-container {
+  position: absolute;
+  top: 60px; 
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-container {
+
+  height: calc(100vh - 60px); 
+  overflow: auto;
+}
+
+.editor-wrapper {
+  min-height: 100%;
+  width: 100%;
+  padding-top: 80px;
   padding-left: 60px;
 }
-@media (min-width: 1024px) {
-  .cm-editor {
-    padding-left: 140px !important;
+@media (max-width: 1024px) {
+  .editor-wrapper {
+    padding-left: 20px;
   }
 }
-.cm-scroller {
-  height: 100% !important;
-  width: 100% !important;
-  overflow: auto !important;
+
+.editor-content {
+  min-height: 100%;
+  width: 100%;
 }
-.cm-content {
-  text-align: left;
-}
-.cm-line {
+
+
+.cm-editor {
   height: auto !important;
+  overflow: hidden !important;
+  background: transparent;
+  outline: none !important;
 }
+
+.cm-scroller {
+  overflow: hidden !important;
+}
+
 </style>

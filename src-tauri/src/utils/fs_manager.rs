@@ -12,6 +12,11 @@ use std::thread::{park, spawn};
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 use walkdir::WalkDir;
+use std::sync::RwLock;
+
+struct VaultState {
+    current_path: RwLock<String>,
+}
 
 pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     let vault_path = app_handle

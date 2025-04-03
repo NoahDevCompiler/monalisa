@@ -1,13 +1,16 @@
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 #[derive(Default)]
 pub struct AppState {
-    pub current_vault: Option<PathBuf>,
+    current_vault: Mutex<String>
 }
 
 pub type SharedState = Arc<Mutex<AppState>>;
 
-pub fn init_state() -> SharedState {
-    Arc::new(Mutex::new(AppState::default()))
+impl AppState {
+    pub fn new() -> Self {
+        Self {
+            current_vault: SharedState::new(Arc<Mutex<AppState>)
+        }
+    }
 }

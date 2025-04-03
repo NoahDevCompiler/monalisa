@@ -47,7 +47,7 @@ const openSettings = async () => {
     <Header />
 
     <div
-      class="sidebar overflow-hidden top-8 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
+      class="sidebar overflow-hidden top-7 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
     >
       <div><SidebarContent class="text-[#FDF0D5] font-quickSand" /></div>
     </div>
