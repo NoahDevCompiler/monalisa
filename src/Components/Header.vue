@@ -45,9 +45,11 @@ onMounted(() => {
 
   if (titlebar) {
     titlebar.addEventListener("mousedown", async (e) => {
+      console.log("Mouse down event fired");
       if (!appWindow.value) return;
 
       const clickedElement = e.target as HTMLElement;
+      console.log("Clicked element:", clickedElement.tagName);
       if (
         clickedElement.tagName !== "BUTTON" &&
         !clickedElement.closest("button")
@@ -67,7 +69,8 @@ onMounted(() => {
 
 <template>
   <div
-    class="toolbar fixed top-0 left-0 w-full h-8 flex bg-[#3A3A3A] justify-between z-10 select-none"
+    class="toolbar fixed top-0 left-0 w-full h-8 flex bg-[#3A3A3A] justify-between z-1000 select-none pointer-events-auto"
+    id="toolbar"
   >
     <div class=""></div>
     <div class="flex items-center justify-end right-0 space-x-4">
@@ -83,3 +86,14 @@ onMounted(() => {
     </div>
   </div>
 </template>
+<style>
+#toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  z-index: 9999; 
+  -webkit-app-region: drag; 
+}
+</style>

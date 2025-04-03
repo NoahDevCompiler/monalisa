@@ -28,35 +28,18 @@ const appWindow = getCurrentWindow();
 //const close = async () => {
 //  appWindow.close();
 //};
-//const openSettings = async () => {
-//  try{
-//    await openSettingsWindow();
-//  }
-//  catch(e){
-//    info("Failed ")
-//  }
-//
-//};
 
-//onMounted(() => {
-//  const titlebar = document.getElementById("toolbar");
-//
-//  if (titlebar) {
-//    titlebar.addEventListener("mousedown", (e) => {
-//      const clickedElement = e.target as HTMLElement;
-//      if (
-//        clickedElement.tagName !== "BUTTON" &&
-//        !clickedElement.closest("button")
-//      ) {
-//        if (e.buttons === 1) {
-//          e.detail === 2
-//            ? appWindow.toggleMaximize()
-//            : appWindow.startDragging();
-//        }
-//      }
-//    });
-//  }
-//});
+const openSettings = async () => {
+  try{
+    await openSettingsWindow();
+  }
+  catch(e){
+    info("Failed ")
+  }
+
+};
+
+
 </script>
 
 <template>

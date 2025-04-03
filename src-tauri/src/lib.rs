@@ -1,13 +1,12 @@
+mod config;
 mod initial;
 mod utils;
-mod config;
 use initial::init_app_dirs;
-use utils::fs_manager;
 mod vault;
-use vault::manager;
-use vault::fs_operations;
-pub mod state;
 pub mod errors;
+pub mod state;
+use crate::utils::fs_manager;
+
 
 #[tauri::command]
 fn minimize_window(window: tauri::Window) {
@@ -25,18 +24,14 @@ fn close_window(window: tauri::Window) {
 }
 pub fn run() {
     tauri::Builder::default()
-        .setup(|app| {
-            init_app_dirs::init_default(app.handle())?;
-            Ok(())
-        })
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             minimize_window,
             maximize_window,
             close_window,
-            //fs_manager::create_folder,
-            //fs_manager::create_md_file
+            fs_manager::create_folder,
+            fs_manager::create_md_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

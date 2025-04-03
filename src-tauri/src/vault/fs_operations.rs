@@ -6,7 +6,7 @@ use crate::state::SharedState;
 pub fn create_folder(app_handle: AppHandle, name: Option<&str>, folder: Option<&str>) -> Result<(), String> {
     
     let state = app_handle.state::<SharedState>();
-    let mut vault_path = state.lock()?.current_vault.as_ref().ok_or(Va)
+    let mut vault_path = state.lock().current_vault.as_ref().unwrap();
 
     if let Some(folder_name) = folder {
         vault_path = vault_path.join(folder_name)
