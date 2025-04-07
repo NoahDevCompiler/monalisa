@@ -5,6 +5,7 @@ import { popAnimation } from "../utils/motion.js";
 import { ref, nextTick } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { treeNodeProps } from "element-plus/es/components/tree-v2/src/virtual-tree.mjs";
+import { onMounted } from "vue";
 
 //Give parameter of folder to backend to save node in parent folder
 //when i click the folder icon to create a new folder and i click inside the input and press enter leaving the input empty
@@ -17,15 +18,28 @@ const selectedNode = ref<TreeNode | null>(null);
 const isSaving = ref(false);
 
 type TreeNode = {
-  id: string;
+  id: number;
   label: string;
   type: "folder" | "file";
   path?: string;
   children?: TreeNode[];
   editing?: boolean;
 };
+type DirEntry = {
+  name: string,
+  path: string,
+  is_dir: boolean,
+  size? : number
+}
+type DirContent = {
+  entries: DirEntry[];
+}
 
 const handleDrop = () => {};
+
+onMounted(() => {
+  read_dir();
+})
 
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
@@ -34,7 +48,35 @@ const handleNodeClick = (data: TreeNode) => {
   }
 };
 
-const focusInput = async (id: string) => {
+async function read_dir() {
+  const dirContent = await invoke<DirContent>("read_directory");
+  console.log(dirContent);
+
+  const createNode = (entry) => {
+    const node = {
+      id: Date.now() + Math.random(),
+      label: entry.name,
+      type: entry.is_dir ? "folder" : "file",
+      path: entry.path,
+      children: entry.children ? entry.children.map(createNode) : [], 
+    };
+    return node;
+  };
+
+  // Start with the root directory
+  const nodes = dirContent.children.map(createNode);  
+
+  nodes.forEach((node) => {
+    treeData.value.push(node);
+  });
+
+  // Output the tree structure
+  console.log(nodes);
+  return nodes;
+}
+
+
+const focusInput = async (id: number) => {
   await nextTick();
   const input = document.getElementById(`input-${id}`) as HTMLInputElement;
   if (input) {
@@ -55,7 +97,7 @@ async function addFolder() {
       : "";
 
   const newNode: TreeNode = {
-    id: Date.now().toString(),
+    id: Date.now(),
     label: "",
     type: "folder",
     path: parentPath,
@@ -79,7 +121,7 @@ async function addFile() {
       : "";
 
   const newNode: TreeNode = {
-    id: Date.now().toString(),
+    id: Date.now(),
     label: "",
     type: "file",
     path: parentPath,

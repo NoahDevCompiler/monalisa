@@ -1,18 +1,21 @@
+use crate::errors::VaultError;
+use crate::models::fs::{DirContent, DirEntry};
 use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::fmt::format;
 use std::fs;
+use std::fs::read_dir;
 use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use std::str::SplitWhitespace;
 use std::sync::mpsc::channel;
+use std::sync::RwLock;
 use std::sync::{self, Arc, Mutex};
 use std::thread::{park, spawn};
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 use walkdir::WalkDir;
-use std::sync::RwLock;
 
 struct VaultState {
     current_path: RwLock<String>,
@@ -73,6 +76,41 @@ pub fn create_folder(
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn read_directory(app_handle: AppHandle) -> Result<DirEntry, VaultError> {
+    let path =
+        get_default_vault_path(&app_handle).map_err(|e| VaultError::PathResolution(e.to_string()))?;
+
+    build_tree(&path)
+}
+pub fn build_tree(path: &Path) -> Result<DirEntry, VaultError> {
+    let metadata = fs::metadata(path)?;
+    let is_dir = metadata.is_dir();
+
+    let mut entry = DirEntry {
+        name: path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .into_owned(),
+        path: path.to_path_buf(),
+        is_dir,
+        size: metadata.len(),
+        children: None,
+    };
+
+    if is_dir {
+        let mut children = Vec::new();
+        for child in fs::read_dir(path)? {
+            let child = child?;
+            children.push(build_tree(&child.path())?);
+        }
+        entry.children = Some(children);
+    }
+
+    Ok(entry)
 }
 
 #[tauri::command]

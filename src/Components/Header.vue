@@ -69,11 +69,12 @@ onMounted(() => {
 
 <template>
   <div
-    class="toolbar fixed top-0 left-0 w-full h-8 flex bg-[#3A3A3A] justify-between z-1000 select-none pointer-events-auto"
+    class="toolbar fixed top-0 left-0 h-8 flex bg-[#3A3A3A] justify-between z-1000 select-none pointer-events-auto"
     id="toolbar"
   >
+    <div class="h-8 overflow-hidden justify-center items-center flex-grow"><TabManager/></div>
     <div class=""></div>
-    <div class="flex items-center right-0">
+    <div class="flex items-center">
       <button @click="minimize" class="button text-white hover:bg-slate-400 h-full rounded-none">
         <MinusIcon class="size-5" />
       </button>

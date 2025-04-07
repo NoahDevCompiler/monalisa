@@ -46,8 +46,8 @@ const removeTab = (targetName: TabPaneName) => {
 </script>
 
 <template>
-  <div class="flex-1 h-full overflow-x-auto scrollbar-hide">
-    <div class="flex h-full items-center min-w-max"></div>
+  <div class="fixed top-0 left-0 w-full h-8 flex bg-[#3A3A3A] justify-between select-none pointer-events-auto">
+    <div class="flex-1 overflow-x-auto"></div>
     <el-button size="small" @click="addTab(editableTabsValue)">
       add tab
     </el-button>
@@ -86,6 +86,10 @@ const removeTab = (targetName: TabPaneName) => {
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
+  width: 100%;
+}
+.el-tabs{
+  display: flex;
 }
 </style>
   

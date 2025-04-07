@@ -1,10 +1,12 @@
+#![allow(dead_code)]
 mod config;
 mod initial;
 mod utils;
+mod models;
 use initial::init_app_dirs;
 mod vault;
 pub mod errors;
-pub mod state;
+//pub mod state;
 use crate::utils::fs_manager;
 
 
@@ -31,7 +33,8 @@ pub fn run() {
             maximize_window,
             close_window,
             fs_manager::create_folder,
-            fs_manager::create_md_file
+            fs_manager::create_md_file,
+            fs_manager::read_directory
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

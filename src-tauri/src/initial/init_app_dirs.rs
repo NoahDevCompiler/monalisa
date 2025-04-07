@@ -3,7 +3,7 @@ use tauri::{AppHandle, Manager};
 use std::path::PathBuf;
 use std::fs;
 use tauri_plugin_log::Error;
-use crate::state::SharedState;
+//use crate::state::SharedState;
 
 pub fn init_default(app_handle: &AppHandle) -> Result<(), String> {
     let vault_path = app_handle

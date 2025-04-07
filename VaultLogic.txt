@@ -1,0 +1,19 @@
+-> App start:
+Create Vault Directory (Documents) & Create Config Directory (AppData)
+Set Default Vault in vaults.json
+Set State => latest used vault in vaults.json
+
+->State
+Current Vault as PathBuf
+
+-> Create Vault
+Create Vault => set in vaults.json
+update Current Vault State
+
+->Change Vault
+User selection => Current Vault State
+
+-> Frontend
+pass State as PathBuf
+update Directory => Watcher in backend 
+
