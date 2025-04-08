@@ -26,20 +26,20 @@ type TreeNode = {
   editing?: boolean;
 };
 type DirEntry = {
-  name: string,
-  path: string,
-  is_dir: boolean,
-  size? : number
-}
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size?: number;
+};
 type DirContent = {
   entries: DirEntry[];
-}
+};
 
 const handleDrop = () => {};
 
 onMounted(() => {
   read_dir();
-})
+});
 
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
@@ -49,6 +49,7 @@ const handleNodeClick = (data: TreeNode) => {
 };
 
 async function read_dir() {
+  console.log("Read_directory called");
   const dirContent = await invoke<DirContent>("read_directory");
   console.log(dirContent);
 
@@ -58,13 +59,13 @@ async function read_dir() {
       label: entry.name,
       type: entry.is_dir ? "folder" : "file",
       path: entry.path,
-      children: entry.children ? entry.children.map(createNode) : [], 
+      children: entry.children ? entry.children.map(createNode) : [],
     };
     return node;
   };
 
   // Start with the root directory
-  const nodes = dirContent.children.map(createNode);  
+  const nodes = dirContent.children.map(createNode);
 
   nodes.forEach((node) => {
     treeData.value.push(node);
@@ -74,7 +75,6 @@ async function read_dir() {
   console.log(nodes);
   return nodes;
 }
-
 
 const focusInput = async (id: number) => {
   await nextTick();
@@ -193,83 +193,89 @@ const treeData = ref<TreeNode[]>([]);
     <FolderPlusIcon @click="addFolder()" class="size-5 cursor-pointer" />
     <PencilSquareIcon @click="addFile()" class="size-5 cursor-pointer" />
   </div>
-
-  <el-tree
-    ref="treeRef"
-    class="custom-tree w-full h-full bg-transparent text-[#FDF0D5]"
-    :data="treeData"
-    default-expand-all
-    node-key="id"
-    @node-click="handleNodeClick"
-    @node-drop="handleDrop"
-    draggable
-  >
-    <template #default="{ node, data }">
-      <div class="node-content">
-        <el-icon v-if="data.type === 'folder'">
-          <svg
-            viewBox="0 0 1024 1024"
-            xmlns="http://www.w3.org/2000/svg"
-            width="1em"
-            height="1em"
-          >
-            <path
-              fill="currentColor"
-              d="M128 192v640h768V320H485.76L357.504 192H128zm-32-64h287.872l128.384 128H928a32 32 0 0 1 32 32v576a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V160a32 32 0 0 1 32-32z"
+  <el-scrollbar class="scroll-container" style="height: 100vh">
+    <el-tree
+      ref="treeRef"
+      class="custom-tree w-full h-full bg-transparent text-[#FDF0D5]"
+      :data="treeData"
+      default-expand-all
+      node-key="id"
+      @node-click="handleNodeClick"
+      @node-drop="handleDrop"
+      draggable
+    >
+      <template #default="{ node, data }">
+        <div class="node-content">
+          <el-icon v-if="data.type === 'folder'">
+            <svg
+              viewBox="0 0 1024 1024"
+              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
+              height="1em"
+            >
+              <path
+                fill="currentColor"
+                d="M128 192v640h768V320H485.76L357.504 192H128zm-32-64h287.872l128.384 128H928a32 32 0 0 1 32 32v576a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V160a32 32 0 0 1 32-32z"
+              />
+            </svg>
+          </el-icon>
+          <el-icon v-if="data.type === 'file'">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="100"
+              height="100"
+              viewBox="0 0 40 40"
+            >
+              <path
+                stroke="#000"
+                stroke-width="1.25"
+                fill="none"
+                d="M6.5 2.5h18.293L33.5 11.207V37.5H6.5z"
+              />
+              <path
+                stroke="#000"
+                stroke-width="1.25"
+                fill="none"
+                d="M24.5 2.5v9h"
+              />
+            </svg>
+          </el-icon>
+          <span v-if="data.editing" class="edit-wrapper">
+            <input
+              :id="'input-' + data.id"
+              v-model="data.label"
+              @blur="saveNode(data, node.parent?.data.children)"
+              @keyup.enter="saveNode(data, node.parent?.data.children)"
+              class="edit-input"
             />
-          </svg>
-        </el-icon>
-        <el-icon v-if="data.type === 'file'">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100"
-            height="100"
-            viewBox="0 0 40 40"
-          >
-            <path
-              stroke="#000"
-              stroke-width="1.25"
-              fill="none"
-              d="M6.5 2.5h18.293L33.5 11.207V37.5H6.5z"
-            />
-            <path
-              stroke="#000"
-              stroke-width="1.25"
-              fill="none"
-              d="M24.5 2.5v9h"
-            />
-          </svg>
-        </el-icon>
-        <span v-if="data.editing" class="edit-wrapper">
-          <input
-            :id="'input-' + data.id"
-            v-model="data.label"
-            @blur="saveNode(data, node.parent?.data.children)"
-            @keyup.enter="saveNode(data, node.parent?.data.children)"
-            class="edit-input"
-          />
-        </span>
-        <span v-else @dblclick.stop="handleDoubleClick(data)">
-          {{
-            data.label || (data.type === "folder" ? "New Folder" : "New File")
-          }}
-        </span>
-      </div>
-    </template>
-    <template #empty>
-      <div
-        class="pt-10 justify-center items-center flex font-quickSand text-xl"
-      >
-        Empty Vault
-      </div>
-    </template>
-  </el-tree>
+          </span>
+          <span v-else @dblclick.stop="handleDoubleClick(data)">
+            {{
+              data.label || (data.type === "folder" ? "New Folder" : "New File")
+            }}
+          </span>
+        </div>
+      </template>
+      <template #empty>
+        <div
+          class="pt-10 justify-center items-center flex font-quickSand text-xl"
+        >
+          Empty Vault
+        </div>
+      </template>
+    </el-tree>
+  </el-scrollbar>
 </template>
 
 <style>
 * {
   user-select: none !important;
 }
+
+.cm-scroller {
+  overflow: hidden !important;
+}
+
 
 .el-tree-node__content .el-icon {
   color: black;

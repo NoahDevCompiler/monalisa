@@ -45,13 +45,22 @@ const openSettings = async () => {
 <template>
   <main class="flex">
     <Header />
-
+    
+    <!-- Sidebar -->
     <div
       class="sidebar overflow-hidden top-7 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
     >
       <div><SidebarContent class="text-[#FDF0D5] font-quickSand" /></div>
     </div>
-    <div class="flex-1 relative">
+
+    <!-- Hauptbereich mit TabManager -->
+    <div class="flex-1 relative flex flex-col">
+      <!-- TabManager wird hier positioniert -->
+      <div class="tabs-container flex flex-grow items-center justify-between">
+        <TabManager class="tabs-between-sidebar-toolbar" />
+      </div>
+
+      <!-- TextField und Navigation -->
       <TextField class="absolute inset-0" />
 
       <ViewfinderCircleIcon
@@ -75,6 +84,8 @@ body {
   overflow: hidden;
 }
 
+
+
 .logo.vite:hover {
   filter: drop-shadow(0 0 2em #747bff);
 }
@@ -90,7 +101,7 @@ body {
   line-height: 24px;
   font-weight: 400;
   overflow: hidden;
-  color: #0f0f0f;
+  color: #000000;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

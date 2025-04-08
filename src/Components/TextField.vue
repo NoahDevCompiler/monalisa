@@ -22,7 +22,7 @@ const markdownHighlight = HighlightStyle.define([
     tag: tags.heading1,
     fontSize: "1.7em",
     fontWeight: "bold",
-    color: "#ff5e62",
+    color: "white",
   },
   {
     tag: tags.heading2,
@@ -102,7 +102,6 @@ onMounted(() => {
   min-height: 100%;
   width: 100%;
 }
-
 
 .cm-editor {
   height: auto !important;

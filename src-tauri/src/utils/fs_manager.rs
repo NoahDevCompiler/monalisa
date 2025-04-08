@@ -34,6 +34,8 @@ pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String>
     if let Err(e) = fs::create_dir_all(&vault_path) {
         return Err(format!("Couldnt create vault {}", e));
     }
+    //let pathbuf =   PathBuf::new();
+    //let newpath = pathbuf.join("C:\\Users\\Noah\\Music\\! Burnt Stash-Kit - 717MaKid");
 
     Ok(vault_path)
 }
@@ -80,8 +82,8 @@ pub fn create_folder(
 
 #[tauri::command]
 pub fn read_directory(app_handle: AppHandle) -> Result<DirEntry, VaultError> {
-    let path =
-        get_default_vault_path(&app_handle).map_err(|e| VaultError::PathResolution(e.to_string()))?;
+    let path = get_default_vault_path(&app_handle)
+        .map_err(|e| VaultError::PathResolution(e.to_string()))?;
 
     build_tree(&path)
 }
@@ -143,6 +145,16 @@ pub fn create_md_file(
     fs::File::create(&file_path).map_err(|e| format!("Couldnt create file {}", e))?;
     Ok(())
 }
+
+#[tauri::command]
+pub fn intervaly_save_input(path: PathBuf, content: String) -> Result<(), VaultError> {
+
+    let _ = fs::write(&path, content).map_err(|_e| VaultError::PermissionDenied { path: path });
+    
+    return Ok(())
+}
+
+
 
 //#[tauri::command]
 //pub fn sync_vault(app_handle: AppHandle, path: PathBuf) {

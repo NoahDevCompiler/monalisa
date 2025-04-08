@@ -1,95 +1,126 @@
-<script lang="ts" setup>
-import { ref } from "vue";
-import type { TabPaneName } from "element-plus";
-
-let tabIndex = 2;
-const editableTabsValue = ref("2");
-const editableTabs = ref([
-  {
-    title: "Tab 1",
-    name: "1",
-    content: "Tab 1 content",
-  },
-  {
-    title: "Tab 2",
-    name: "2",
-    content: "Tab 2 content",
-  },
-]);
-
-const addTab = (targetName: string) => {
-  const newTabName = `${++tabIndex}`;
-  editableTabs.value.push({
-    title: "New Tab",
-    name: newTabName,
-    content: "New Tab content",
-  });
-  editableTabsValue.value = newTabName;
-};
-const removeTab = (targetName: TabPaneName) => {
-  const tabs = editableTabs.value;
-  let activeName = editableTabsValue.value;
-  if (activeName === targetName) {
-    tabs.forEach((tab, index) => {
-      if (tab.name === targetName) {
-        const nextTab = tabs[index + 1] || tabs[index - 1];
-        if (nextTab) {
-          activeName = nextTab.name;
-        }
-      }
-    });
-  }
-
-  editableTabsValue.value = activeName;
-  editableTabs.value = tabs.filter((tab) => tab.name !== targetName);
-};
-</script>
-
 <template>
-  <div class="fixed top-0 left-0 w-full h-8 flex bg-[#3A3A3A] justify-between select-none pointer-events-auto">
-    <div class="flex-1 overflow-x-auto"></div>
-    <el-button size="small" @click="addTab(editableTabsValue)">
-      add tab
-    </el-button>
+  <div class="tab-container">
+    <ul class="tabs clearfix">
+      <li
+        v-for="tab in tablist"
+        :key="tab"
+        :class="{ active: activeTab === tab }" 
+        @click="activeTab = tab"
+  
+      >
+        <a href="#">{{ tab }}</a>
+      </li>
+    </ul>
   </div>
-  <el-tabs
-    v-model="editableTabsValue"
-    type="card"
-    class="demo-tabs"
-    closable
-    @tab-remove="removeTab"
-  >
-    <el-tab-pane
-      v-for="item in editableTabs"
-      :key="item.name"
-      :label="item.title"
-      :name="item.name"
-      class="flex items-center h-full px-3 text-white text-sm cursor-pointer"
-    >
-      {{ item.content }}
-    </el-tab-pane>
-  </el-tabs>
+  <div class="outer-circle"></div>
 </template>
 
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
+const tablist = ["Newtab1", "Newtab2", "Newtab2133", "Newtab3", "Newtab6", "Newtab12353", "Newt123ab33", "Newtab31233", "Newtab31233", "Ned2dwta12db33", "1d", "Newta21d2db33"];
+const activeTab = ref("Newtab1");
+</script>
 
-<style>
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+<style scoped>
+body {
+  user-select: all;
 }
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.demo-tabs > .el-tabs__content {
-  padding: 32px;
-  color: #6b778c;
-  font-size: 32px;
-  font-weight: 600;
-  width: 100%;
-}
-.el-tabs{
+
+.tab-container {
+  box-sizing:content-box;
+  background: transparent;
   display: flex;
+  flex-direction: row;
+  margin-left: 300px;
+}
+
+ul.tabs {
+  margin: 0;
+  list-style-type: none;
+  line-height: 35px;
+  max-height: 35px;
+  overflow: hidden;
+  display: inline-block;
+  padding-right: 20px;
+}
+
+ul.tabs > li.active {
+  z-index: 2;
+  background: #12100e;
+  color: #FDF0D5;
+}
+
+ul.tabs > li.active:before {
+  border-color: transparent #efefef transparent transparent;
+}
+
+ul.tabs > li.active:after {
+  border-color: transparent transparent transparent #22ff00;
+}
+
+ul.tabs > li {
+  float: right;
+  margin: 5px -10px 0;
+  border-top-right-radius: 25px 170px;
+  border-top-left-radius: 20px 90px;
+  padding: 0 30px 0 25px;
+  height: 170px;
+  background: #ddd;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  max-width: 200px;
+}
+
+ul.tabs > li > a {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  color: #000000;
+}
+
+ul.tabs > li.active > a {
+  color: #FDF0D5;
+}
+
+ul.tabs > li:before,
+ul.tabs > li:after {
+  content: "";
+  background: transparent;
+  height: 20px;
+  width: 20px;
+  border-radius: 100%;
+  border-width: 10px;
+  top: 0px;
+  border-style: solid;
+  position: absolute;
+}
+
+ul.tabs > li:before {
+  border-color: transparent hsl(0, 0%, 87%) transparent transparent;
+  -webkit-transform: rotate(48deg);
+  left: -23px;
+}
+
+ul.tabs > li:after {
+  border-color: transparent transparent transparent #ddd;
+  -webkit-transform: rotate(-48deg);
+  right: -17px;
+}
+
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.clearfix {
+  zoom: 1;
 }
 </style>
-  
