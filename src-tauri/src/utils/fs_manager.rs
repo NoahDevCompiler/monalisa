@@ -147,14 +147,20 @@ pub fn create_md_file(
 }
 
 #[tauri::command]
+pub fn read_file(path: PathBuf) -> Result<String, VaultError> {
+    let content = fs::read_to_string(path)?;
+
+    Ok(content)
+
+}
+
+#[tauri::command]
 pub fn intervaly_save_input(path: PathBuf, content: String) -> Result<(), VaultError> {
 
     let _ = fs::write(&path, content).map_err(|_e| VaultError::PermissionDenied { path: path });
     
     return Ok(())
 }
-
-
 
 //#[tauri::command]
 //pub fn sync_vault(app_handle: AppHandle, path: PathBuf) {

@@ -40,66 +40,39 @@ const close = async () => {
   await appWindow.value.close();
 };
 
-onMounted(() => {
-  const titlebar = document.getElementById("toolbar");
 
-  if (titlebar) {
-    titlebar.addEventListener("mousedown", async (e) => {
-      console.log("Mouse down event fired");
-      if (!appWindow.value) return;
-
-      const clickedElement = e.target as HTMLElement;
-      console.log("Clicked element:", clickedElement.tagName);
-      if (
-        clickedElement.tagName !== "BUTTON" &&
-        !clickedElement.closest("button")
-      ) {
-        if (e.buttons === 1) {
-          if (e.detail === 2) {
-            await appWindow.value.toggleMaximize();
-          } else {
-            await appWindow.value.startDragging();
-          }
-        }
-      }
-    });
-  }
-});
 </script>
 
 <template>
-  <div
-    class="toolbar fixed top-0 left-0 h-8 flex bg-[#3A3A3A] justify-between z-1000 select-none pointer-events-auto"
-    id="toolbar"
-  >
-    <div class="h-8 overflow-hidden justify-center items-center flex-grow"><TabManager/></div>
-    <div class=""></div>
-    <div class="flex items-center">
-      <button @click="minimize" class="button text-white hover:bg-slate-400 h-full rounded-none">
+  <div class="toolbar z-[1000] select-none pointer-events-auto items-stretch">
+    <div class="flex right-0 items-stretch">
+      <button
+        @click="minimize"
+        class="button text-white hover:bg-[#169976ae] rounded-none"
+      >
         <MinusIcon class="size-5" />
       </button>
-      <button @click="maximize" class="button text-white hover:bg-slate-400 rounded-none h-full">
-        <StopIcon class="size-5" /> 
+      <button
+        @click="maximize"
+        class="button text-white hover:bg-[#1699769f] rounded-none"
+      >
+        <StopIcon class="size-5" />
       </button>
-      <button @click="close" class="button text-white hover:bg-red-500 rounded-none h-full">
+      <button
+        @click="close"
+        class="button text-white hover:bg-[#ff3636cd] rounded-none"
+      >
         <XMarkIcon class="size-5" />
       </button>
     </div>
   </div>
 </template>
 <style>
-#toolbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 30px;
-  z-index: 9999; 
-  -webkit-app-region: drag; 
-}
 .button {
+  flex: 1;
   justify-content: center;
   display: flex;
+  height: 30px;
   align-items: center;
   width: 36px;
   border: none;

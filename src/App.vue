@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ref, onMounted } from "vue";
+import { ref, onBeforeUnmount, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   MinusIcon,
   StopIcon,
@@ -14,60 +15,125 @@ import TextField from "./Components/TextField.vue";
 import { openSettingsWindow } from "./utils/windows";
 import { info } from "@tauri-apps/plugin-log";
 import Header from "./Components/Header.vue";
+import TabManager from "./Components/TabManager.vue";
 
 const appWindow = getCurrentWindow();
+const selectedFilePath = ref(null);
+const fileContent = ref("");
 
-//const minimize = async () => {
-//  appWindow.minimize();
-//};
-//
-//const maximize = async () => {
-//  appWindow.toggleMaximize();
-//};
-//
-//const close = async () => {
-//  appWindow.close();
-//};
+onMounted(() => {
+  //listen SubWindow
+  listen("tauri://destroyed", (event) => {
+    settingsOpen.value = false;
+  });
+  //Watch Dragging Window
+  const titlebar = document.getElementById("toolbar");
 
-const openSettings = async () => {
-  try{
-    await openSettingsWindow();
+  if (titlebar) {
+    titlebar.addEventListener("mousedown", async (e) => {
+      console.log("Mouse down event fired");
+      if (!appWindow) return;
+
+      const clickedElement = e.target as HTMLElement;
+      console.log("Clicked element:", clickedElement.tagName);
+      if (
+        clickedElement.tagName !== "BUTTON" &&
+        !clickedElement.closest("button")
+      ) {
+        if (e.buttons === 1) {
+          if (e.detail === 2) {
+            await appWindow.toggleMaximize();
+          } else {
+            await appWindow.startDragging();
+          }
+        }
+      }
+    });
   }
-  catch(e){
-    info("Failed ")
-  }
+});
 
+async function handleFileSelected(path: any) {
+  selectedFilePath.value = path;
+  fileContent.value = await invoke("read_file", { path: path });
+}
+
+const sidebarWidth = ref(300);
+let isResizing = false;
+
+const startResizing = (e) => {
+  isResizing = true;
+  document.addEventListener("mousemove", resize);
+  document.addEventListener("mouseup", stopResizing);
 };
 
+const resize = (e) => {
+  if (isResizing) {
+    const maxWidth = window.innerWidth * 0.5;
+    sidebarWidth.value = Math.max(Math.min(e.clientX, maxWidth), 200);
+  }
+};
 
+const stopResizing = () => {
+  isResizing = false;
+  document.removeEventListener("mousemove", resize);
+  document.removeEventListener("mouseup", stopResizing);
+};
+
+onBeforeUnmount(() => {
+  stopResizing();
+});
+
+const settingsOpen = ref(false);
+const openSettings = async () => {
+  try {
+    await openSettingsWindow();
+    settingsOpen.value = true;
+  } catch (e) {
+    info("Failed ");
+  }
+};
 </script>
 
 <template>
-  <main class="flex">
-    <Header />
-    
-    <!-- Sidebar -->
-    <div
-      class="sidebar overflow-hidden top-7 left-0 w-[300px] h-screen bg-[#A69888] pt-2 break-words relative"
-    >
-      <div><SidebarContent class="text-[#FDF0D5] font-quickSand" /></div>
+  <main class="app-grid" :class="settingsOpen ? 'blur-sm' : 'blur-none'">
+    <div class="toolbar-grid" id="toolbar">
+      <div class="toolbar-tabs" :style="{ width: sidebarWidth + 'px' }"></div>
+
+      <div
+        class="w-[1px] fixed h-full rounded-lg z-10000 cursor-col-resize bg-gray-500 transition-colors hover:bg-[#1DCD9F] hover:w-1"
+        @mousedown="startResizing"
+        :style="{ left: sidebarWidth + 'px' }"
+      ></div>
+
+      <div class="flex w-full h-[30px] overflow-hidden">
+        <div class="flex-1 min-w-0 overflow-hidden items-center flex px-2">
+          <TabManager class="w-full h-[30px] overflow-hidden" />
+        </div>
+
+        <div class="shrink-0 bg-gray-400/40 flex justify-end items-center">
+          <Header />
+        </div>
+      </div>
     </div>
 
-    <!-- Hauptbereich mit TabManager -->
-    <div class="flex-1 relative flex flex-col">
-      <!-- TabManager wird hier positioniert -->
-      <div class="tabs-container flex flex-grow items-center justify-between">
-        <TabManager class="tabs-between-sidebar-toolbar" />
-      </div>
+    <div
+      class="sidebar bg-[#222222]"
+      style="grid-column: 1; grid-row: 2"
+      :style="{ width: sidebarWidth + 'px' }"
+      ref="sidebar"
+    >
+      <SidebarContent
+        @file-selected="handleFileSelected"
+        class="text-[#FDF0D5]"
+      />
+    </div>
 
-      <!-- TextField und Navigation -->
-      <TextField class="absolute inset-0" />
-
+    <div class="main-content relative flex flex-col">
+      <TextField :content="fileContent" class="absolute inset-0" />
       <ViewfinderCircleIcon
         @click="openSettings"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"
       />
-
       <Navigation class="fixed z-1000" />
     </div>
   </main>
@@ -84,8 +150,6 @@ body {
   overflow: hidden;
 }
 
-
-
 .logo.vite:hover {
   filter: drop-shadow(0 0 2em #747bff);
 }
@@ -95,6 +159,71 @@ body {
 }
 </style>
 <style>
+.app-grid {
+  display: grid;
+  grid-template-columns: auto 4px 1fr;
+  grid-template-rows: 30px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.toolbar-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-column: 1 / 4;
+  background-color: #2e2e2e;
+  color: white;
+  height: 30px;
+  border-bottom: 1px solid gray;
+}
+
+.toolbar-sidebar {
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  border-right: 1px solid gray;
+}
+
+.toolbar-tabs {
+  flex: 1 1 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 8px;
+  flex-grow: 1;
+}
+
+.toolbar-buttons {
+  min-width: 100px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.sidebar {
+  grid-column: 1;
+  grid-row: 2;
+  overflow: hidden;
+  width: 100%;
+}
+
+.main-content {
+  grid-column: 3 / 4;
+  grid-row: 2;
+  background-color: #000000;
+  position: relative;
+}
+
+.w-8 {
+  position: absolute;
+  top: 0;
+  left: var(--sidebar-width, 300px);
+  cursor: col-resize;
+  background-color: #555;
+  z-index: 10000;
+  height: 100%;
+}
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -187,7 +316,7 @@ button {
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
-    background-color: #12100e;
+    background-color: #000000;
   }
 
   input,

@@ -1,69 +1,66 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import {
-  EditorView,
-  Decoration,
-  WidgetType,
-  MatchDecorator,
-  DecorationSet,
-  ViewPlugin,
-  ViewUpdate,
-} from "@codemirror/view";
-import { minimalSetup } from "codemirror";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
-import { tags } from "@lezer/highlight";
-import { oneDark } from "@codemirror/theme-one-dark";
+import { ref, watch, onMounted, defineProps, defineEmits } from "vue";
+import { Editor, EditorContent } from "@tiptap/vue-3";
+import StarterKit from "@tiptap/starter-kit";
+import Focus from "@tiptap/extension-focus";
+import Heading from "@tiptap/extension-heading";
+import Paragraph from "@tiptap/extension-paragraph";
+import CodeBlock from "@tiptap/extension-code-block";
 
-const editorEl = ref(null);
+const props = defineProps({
+  content: String,
+});
+const emit = defineEmits(["update:content"]);
 
-const markdownHighlight = HighlightStyle.define([
-  {
-    tag: tags.heading1,
-    fontSize: "1.7em",
-    fontWeight: "bold",
-    color: "white",
-  },
-  {
-    tag: tags.heading2,
-    fontSize: "1.4em",
-    fontWeight: "bold",
-    color: "#ff9966",
-  },
-  {
-    tag: tags.heading3,
-    fontSize: "1.2em",
-    fontWeight: "bold",
-    color: "#ffcc66",
-  },
-  { tag: tags.monospace, fontFamily: "monospace" },
-]);
+const content = ref(props.content);
+const editor = ref<Editor | null>(null);
 
 onMounted(() => {
-  const view = new EditorView({
-    doc: "# Start writing here...",
+  editor.value = new Editor({
+    content: content.value,
     extensions: [
-      minimalSetup,
-      markdown(),
-      oneDark,
-      syntaxHighlighting(markdownHighlight),
-      EditorView.lineWrapping,
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: "list-disc ml-8",
+          },
+        },
+      }),
+      Focus.configure({
+        className: "has-focus",
+        mode: "deepest",
+      }),
+      Heading.configure({
+        levels: [1, 2, 3],
+      }),
+      Paragraph,
+      CodeBlock,
     ],
-    parent: editorEl.value,
+    onUpdate: ({ editor }) => {
+      emit("update:content", editor.getHTML());
+    },
   });
-
-  // Editor anpassen, damit Höhe richtig berechnet wird
-  setTimeout(() => {
-    view.requestMeasure();
-  }, 50);
+  console.log("text content", content.value);
 });
+
+watch(
+  () => props.content,
+  (newContent) => {
+    if (editor.value && newContent !== editor.value.getHTML()) {
+      editor.value.commands.setContent(newContent || "", false);
+    }
+  }
+);
 </script>
 
 <template>
   <div class="editor-container">
     <el-scrollbar class="scroll-container">
       <div class="editor-wrapper">
-        <div ref="editorEl" class="editor-content" />
+        <EditorContent
+          :editor="editor"
+          class="editor-content font-quickSand tiptap"
+        />
       </div>
     </el-scrollbar>
   </div>
@@ -72,46 +69,58 @@ onMounted(() => {
 <style>
 .editor-container {
   position: absolute;
-  top: 60px; 
+  top: 20px;
   bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   flex-direction: column;
 }
 
 .scroll-container {
-
-  height: calc(100vh - 60px); 
+  height: calc(100vh - 60px);
   overflow: auto;
 }
 
 .editor-wrapper {
-  min-height: 100%;
-  width: 100%;
+  height: 100%;
+  width: 70vw;
   padding-top: 80px;
-  padding-left: 60px;
+  padding-left: 150px;
 }
+
 @media (max-width: 1024px) {
   .editor-wrapper {
     padding-left: 20px;
   }
 }
 
-.editor-content {
-  min-height: 100%;
-  width: 100%;
-}
-
-.cm-editor {
-  height: auto !important;
+.tiptap {
+  height: 100% !important;
   overflow: hidden !important;
   background: transparent;
   outline: none !important;
 }
 
+.tiptap h1 {
+  margin-top: 1.5em;
+  font-size: 1.9em;
+  font-weight: bold;
+}
+.tiptap h2 {
+  margin-top: 1.5em;
+  font-size: 1.6em;
+  font-weight: 600;
+}
+.tiptap h3 {
+  margin-top: 1.5em;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+.tiptap code {
+  color: inherit;
+  font-size: 0.8rem;
+}
+
 .cm-scroller {
   overflow: hidden !important;
 }
-
 </style>

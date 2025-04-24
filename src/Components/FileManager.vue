@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { PencilSquareIcon, FolderPlusIcon } from "@heroicons/vue/24/outline";
+import { DocumentPlusIcon, FolderPlusIcon, DocumentIcon, FolderIcon } from "@heroicons/vue/24/outline";
 import { info } from "@tauri-apps/plugin-log";
 import { popAnimation } from "../utils/motion.js";
 import { ref, nextTick } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { treeNodeProps } from "element-plus/es/components/tree-v2/src/virtual-tree.mjs";
-import { onMounted } from "vue";
+import { onMounted, defineEmits } from "vue";
 
 //Give parameter of folder to backend to save node in parent folder
 //when i click the folder icon to create a new folder and i click inside the input and press enter leaving the input empty
@@ -16,6 +16,8 @@ const key = ref(false);
 const treeRef = ref<any>(null);
 const selectedNode = ref<TreeNode | null>(null);
 const isSaving = ref(false);
+
+const emit = defineEmits(["file-selected"]);
 
 type TreeNode = {
   id: number;
@@ -35,16 +37,19 @@ type DirContent = {
   entries: DirEntry[];
 };
 
-const handleDrop = () => {};
-
+function allowDrop(draggingNode: any, dropNode: any, type: string) {
+  return dropNode.data.type == "folder";
+}
 onMounted(() => {
   read_dir();
 });
 
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
-  if (selectedNode.value) {
-    //info(selectedNode.value.label);
+
+  if (data.type == "file") {
+    emit("file-selected", data.path);
+    info(data.path);
   }
 };
 
@@ -64,14 +69,12 @@ async function read_dir() {
     return node;
   };
 
-  // Start with the root directory
   const nodes = dirContent.children.map(createNode);
 
   nodes.forEach((node) => {
     treeData.value.push(node);
   });
 
-  // Output the tree structure
   console.log(nodes);
   return nodes;
 }
@@ -191,54 +194,27 @@ const treeData = ref<TreeNode[]>([]);
     class="icons gap-2 flex flex-row justify-center items-center text-[white]"
   >
     <FolderPlusIcon @click="addFolder()" class="size-5 cursor-pointer" />
-    <PencilSquareIcon @click="addFile()" class="size-5 cursor-pointer" />
+    <DocumentPlusIcon @click="addFile()" class="size-5 cursor-pointer" />
   </div>
   <el-scrollbar class="scroll-container" style="height: 100vh">
     <el-tree
       ref="treeRef"
-      class="custom-tree w-full h-full bg-transparent text-[#FDF0D5]"
+      class="custom-tree w-[95%] h-full bg-transparent text-[#FDF0D5] mt-5 flex flex-col gap-2"
       :data="treeData"
       default-expand-all
       node-key="id"
       @node-click="handleNodeClick"
       @node-drop="handleDrop"
+      :allow-drop="allowDrop"
       draggable
     >
       <template #default="{ node, data }">
         <div class="node-content">
           <el-icon v-if="data.type === 'folder'">
-            <svg
-              viewBox="0 0 1024 1024"
-              xmlns="http://www.w3.org/2000/svg"
-              width="1em"
-              height="1em"
-            >
-              <path
-                fill="currentColor"
-                d="M128 192v640h768V320H485.76L357.504 192H128zm-32-64h287.872l128.384 128H928a32 32 0 0 1 32 32v576a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V160a32 32 0 0 1 32-32z"
-              />
-            </svg>
+            <FolderIcon/>
           </el-icon>
           <el-icon v-if="data.type === 'file'">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="100"
-              height="100"
-              viewBox="0 0 40 40"
-            >
-              <path
-                stroke="#000"
-                stroke-width="1.25"
-                fill="none"
-                d="M6.5 2.5h18.293L33.5 11.207V37.5H6.5z"
-              />
-              <path
-                stroke="#000"
-                stroke-width="1.25"
-                fill="none"
-                d="M24.5 2.5v9h"
-              />
-            </svg>
+           <DocumentIcon/>
           </el-icon>
           <span v-if="data.editing" class="edit-wrapper">
             <input
@@ -275,7 +251,6 @@ const treeData = ref<TreeNode[]>([]);
 .cm-scroller {
   overflow: hidden !important;
 }
-
 
 .el-tree-node__content .el-icon {
   color: black;
