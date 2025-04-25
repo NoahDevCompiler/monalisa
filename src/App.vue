@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ref, onBeforeUnmount, onMounted } from "vue";
+import { ref, onBeforeUnmount, onMounted, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -19,7 +19,9 @@ import TabManager from "./Components/TabManager.vue";
 
 const appWindow = getCurrentWindow();
 const selectedFilePath = ref(null);
-const fileContent = ref("");
+const loadContent = ref("");
+const updateContent = ref("");
+const isSaving = ref(false);
 
 onMounted(() => {
   //listen SubWindow
@@ -31,14 +33,13 @@ onMounted(() => {
 
   if (titlebar) {
     titlebar.addEventListener("mousedown", async (e) => {
-      console.log("Mouse down event fired");
       if (!appWindow) return;
 
       const clickedElement = e.target as HTMLElement;
-      console.log("Clicked element:", clickedElement.tagName);
       if (
         clickedElement.tagName !== "BUTTON" &&
-        !clickedElement.closest("button")
+        !clickedElement.closest("button") &&
+        clickedElement.id !== "resizer"
       ) {
         if (e.buttons === 1) {
           if (e.detail === 2) {
@@ -53,9 +54,45 @@ onMounted(() => {
 });
 
 async function handleFileSelected(path: any) {
+  //if (updateContent.value !== null && selectedFilePath !== path) {
+  //  await saveFile();
+  //}
+  //updateContent.value = "";
   selectedFilePath.value = path;
-  fileContent.value = await invoke("read_file", { path: path });
+  loadContent.value = await invoke("read_file", { path: path });
 }
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 's') {
+    
+    e.preventDefault();
+    saveFile();
+    console.log('CTRL + S');
+  }
+});
+
+//function debounce(fn: Function, delay: number) {
+//  let timeout: ReturnType<typeof setTimeout>;
+//  return (...args: any[]) => {
+//    clearTimeout(timeout);
+//    timeout = setTimeout(() => fn(...args), delay);
+//  };
+//}
+//const debouncedSave = debounce(saveFile, 2000);
+//
+async function saveFile() {
+  if (isSaving.value || !selectedFilePath.value) return;
+  isSaving.value = true;
+  await invoke("write_file", {
+    path: selectedFilePath.value,
+    content: updateContent.value,
+  });
+  console.log("Saved file with content", updateContent.value);
+  isSaving.value = false;
+}
+//watch(updateContent, (newContent) => {
+//  debouncedSave();
+//});
 
 const sidebarWidth = ref(300);
 let isResizing = false;
@@ -103,6 +140,7 @@ const openSettings = async () => {
         class="w-[1px] fixed h-full rounded-lg z-10000 cursor-col-resize bg-gray-500 transition-colors hover:bg-[#1DCD9F] hover:w-1"
         @mousedown="startResizing"
         :style="{ left: sidebarWidth + 'px' }"
+        id="resizer"
       ></div>
 
       <div class="flex w-full h-[30px] overflow-hidden">
@@ -129,7 +167,11 @@ const openSettings = async () => {
     </div>
 
     <div class="main-content relative flex flex-col">
-      <TextField :content="fileContent" class="absolute inset-0" />
+      <TextField
+        :content="loadContent"
+        v-model="updateContent"
+        class="absolute inset-0"
+      />
       <ViewfinderCircleIcon
         @click="openSettings"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"

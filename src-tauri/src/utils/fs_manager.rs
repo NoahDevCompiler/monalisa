@@ -155,10 +155,9 @@ pub fn read_file(path: PathBuf) -> Result<String, VaultError> {
 }
 
 #[tauri::command]
-pub fn intervaly_save_input(path: PathBuf, content: String) -> Result<(), VaultError> {
+pub fn write_file(path: PathBuf, content: String) -> Result<(), VaultError> {
 
     let _ = fs::write(&path, content).map_err(|_e| VaultError::PermissionDenied { path: path });
-    
     return Ok(())
 }
 
