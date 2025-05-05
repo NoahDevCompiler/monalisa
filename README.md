@@ -1,6 +1,22 @@
-# Tauri + Vue + TypeScript
+## 🚧 Status: Work In Progress
+This app is currently in development and not yet feature-complete. Basic functionality for writing and managing notes is implemented.
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Features (So Far)
+- Create and edit text-based notes
+
+- Save notes directly to the Windows file system (no database required)
+
+- Fast and minimal UI powered by Vue.js
+
+- Native performance via Tauri
+
+## Installation 
+```
+git clone https://github.com/NoahDevCompiler/Knowledge-Management-App.git
+cd knowledgeapp
+npm i
+npm run tauri dev
+```
 
 ## Recommended IDE Setup
 
