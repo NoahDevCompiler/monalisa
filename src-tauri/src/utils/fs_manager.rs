@@ -1,5 +1,6 @@
 use crate::errors::VaultError;
 use crate::models::fs::{DirContent, DirEntry};
+use crate::vault;
 use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -21,7 +22,7 @@ struct VaultState {
     current_path: RwLock<String>,
 }
 
-pub fn get_default_vault_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+pub fn get_default_vault_path(app_handle: tauri::AppHandle) -> Result<PathBuf, String> {
     let vault_path = app_handle
         .path()
         .resolve("Monalisa Vault", BaseDirectory::Document);
@@ -56,11 +57,11 @@ impl From<Event> for SerializedEvent {
 
 #[tauri::command]
 pub fn create_folder(
-    app_handle: AppHandle,
+    app_handle: tauri::AppHandle,
     name: Option<&str>,
     folder: Option<&str>,
 ) -> Result<(), String> {
-    let mut vault_path = get_default_vault_path(&app_handle)?;
+    let mut vault_path = get_default_vault_path(app_handle)?;
 
     if let Some(folder_name) = folder {
         vault_path = vault_path.join(folder_name)
@@ -81,8 +82,8 @@ pub fn create_folder(
 }
 
 #[tauri::command]
-pub fn read_directory(app_handle: AppHandle) -> Result<DirEntry, VaultError> {
-    let path = get_default_vault_path(&app_handle)
+pub fn read_directory(app_handle: tauri::AppHandle) -> Result<DirEntry, VaultError> {
+    let path = get_default_vault_path(app_handle)
         .map_err(|e| VaultError::PathResolution(e.to_string()))?;
 
     build_tree(&path)
@@ -117,11 +118,11 @@ pub fn build_tree(path: &Path) -> Result<DirEntry, VaultError> {
 
 #[tauri::command]
 pub fn create_md_file(
-    app_handle: AppHandle,
+    app_handle: tauri::AppHandle,
     name: Option<&str>,
     folder: Option<&str>,
 ) -> Result<(), String> {
-    let mut vault_path = get_default_vault_path(&app_handle)?;
+    let mut vault_path = get_default_vault_path(app_handle)?;
 
     if let Some(folder_name) = folder {
         vault_path = vault_path.join(folder_name)
@@ -151,15 +152,12 @@ pub fn read_file(path: PathBuf) -> Result<String, VaultError> {
     let content = fs::read_to_string(path)?;
 
     Ok(content)
-
 }
 
 #[tauri::command]
-pub fn intervaly_save_input(path: PathBuf, content: String) -> Result<(), VaultError> {
-
+pub fn write_file(path: PathBuf, content: String) -> Result<(), VaultError> {
     let _ = fs::write(&path, content).map_err(|_e| VaultError::PermissionDenied { path: path });
-    
-    return Ok(())
+    return Ok(());
 }
 
 //#[tauri::command]
@@ -191,7 +189,7 @@ pub fn intervaly_save_input(path: PathBuf, content: String) -> Result<(), VaultE
 //    });
 //}
 
-pub fn init_vault_load(app_handle: &AppHandle, path: &Path) -> Result<Vec<PathBuf>, String> {
+pub fn init_vault_load(app_handle: tauri::AppHandle, path: &Path) -> Result<Vec<PathBuf>, String> {
     let root = get_default_vault_path(app_handle)?;
     let mut files = Vec::new();
     for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
@@ -201,6 +199,19 @@ pub fn init_vault_load(app_handle: &AppHandle, path: &Path) -> Result<Vec<PathBu
         } else if entry.file_type().is_dir() {
             let rel_path = entry.path().strip_prefix(&root).unwrap();
             files.push(rel_path.to_path_buf());
+        }
+    }
+    return Ok(files);
+}
+
+#[tauri::command]
+pub fn get_cards(app_handle: tauri::AppHandle) -> Result<Vec<String>, String> {
+    let vault_path = get_default_vault_path(app_handle)?;
+    let mut files = Vec::new();
+    let cardpath = vault_path.join("Cards");
+    for entry in WalkDir::new(cardpath).into_iter().filter_map(|e| e.ok()) {
+        if entry.file_type().is_file() {
+            files.push(fs::read_to_string(entry.path()).unwrap());
         }
     }
     return Ok(files);

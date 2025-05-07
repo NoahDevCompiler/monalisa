@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ref, onBeforeUnmount, onMounted } from "vue";
+import { ref, onBeforeUnmount, onMounted, watch, nextTick } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -14,12 +14,18 @@ import SidebarContent from "./Components/FileManager.vue";
 import TextField from "./Components/TextField.vue";
 import { openSettingsWindow } from "./utils/windows";
 import { info } from "@tauri-apps/plugin-log";
+import learncards from "./assets/learncards.png";
 import Header from "./Components/Header.vue";
 import TabManager from "./Components/TabManager.vue";
+import Charts from "./Components/Charts.vue";
+import { callOpenAI } from "./api/ai-api.ts";
 
 const appWindow = getCurrentWindow();
-const selectedFilePath = ref(null);
-const fileContent = ref("");
+const selectedFilePath = ref<string>("");
+const loadContent = ref("");
+const updateContent = ref("");
+const isSaving = ref(false);
+const showCards = ref(false);
 
 onMounted(() => {
   //listen SubWindow
@@ -31,14 +37,13 @@ onMounted(() => {
 
   if (titlebar) {
     titlebar.addEventListener("mousedown", async (e) => {
-      console.log("Mouse down event fired");
       if (!appWindow) return;
 
       const clickedElement = e.target as HTMLElement;
-      console.log("Clicked element:", clickedElement.tagName);
       if (
         clickedElement.tagName !== "BUTTON" &&
-        !clickedElement.closest("button")
+        !clickedElement.closest("button") &&
+        clickedElement.id !== "resizer"
       ) {
         if (e.buttons === 1) {
           if (e.detail === 2) {
@@ -52,10 +57,76 @@ onMounted(() => {
   }
 });
 
-async function handleFileSelected(path: any) {
-  selectedFilePath.value = path;
-  fileContent.value = await invoke("read_file", { path: path });
+async function handleFileSelected(newPath: any) {
+  if (isSaving.value) return;
+  const currentPath = selectedFilePath.value;
+  const currentContent = updateContent.value;
+
+  selectedFilePath.value = newPath;
+
+  if (currentPath != newPath) {
+    isSaving.value = true;
+    console.log("isSaving");
+    try {
+      console.log("Call SaveFile");
+      await saveFile(currentPath, currentContent);
+    } finally {
+      isSaving.value = false;
+    }
+  }
+  try {
+    loadContent.value = await invoke("read_file", { path: newPath });
+    updateContent.value = loadContent.value;
+  } catch (e) {
+    console.error("Error on loading new Content", e);
+  }
 }
+
+document.addEventListener("keydown", async (e) => {
+  if (e.ctrlKey && e.key === "s") {
+    e.preventDefault();
+    await saveFile(selectedFilePath.value);
+    console.log("CTRL + S");
+  }
+});
+
+watch(
+  () => updateContent.value,
+  async () => {
+    const currentPath = selectedFilePath.value
+    const currentContent = updateContent.value
+    setTimeout(async function () {
+      await saveFile(currentPath, currentContent);
+    }, 1000);
+  }
+);
+async function saveFile(path: string | null, content?: string) {
+  if (path == null) return;
+  await invoke("write_file", {
+    path: path,
+    content: content,
+  });
+  console.log("Saved file with content", updateContent.value);
+}
+
+const handleClickNavigation = (index) => {
+  console.log(showCards.value);
+  if (index == 0) {
+    showCards.value = true;
+  }
+  if (index == 1) {
+    console.log(updateContent.value);
+    callOpenAI(updateContent.value)
+      .then((response: string) => {
+        loadContent.value = response;
+        console.log("ai response", response);
+        console.log("new Content for TextEditor", loadContent);
+      })
+      .catch((e: string) => {
+        console.log(e);
+      });
+  }
+};
 
 const sidebarWidth = ref(300);
 let isResizing = false;
@@ -103,6 +174,7 @@ const openSettings = async () => {
         class="w-[1px] fixed h-full rounded-lg z-10000 cursor-col-resize bg-gray-500 transition-colors hover:bg-[#1DCD9F] hover:w-1"
         @mousedown="startResizing"
         :style="{ left: sidebarWidth + 'px' }"
+        id="resizer"
       ></div>
 
       <div class="flex w-full h-[30px] overflow-hidden">
@@ -129,12 +201,18 @@ const openSettings = async () => {
     </div>
 
     <div class="main-content relative flex flex-col">
-      <TextField :content="fileContent" class="absolute inset-0" />
+      <TextField
+        v-if="!showCards"
+        :content="loadContent"
+        v-model="updateContent"
+        class="absolute inset-0"
+      />
+      <Charts v-else class="absolute inset-0"></Charts>
       <ViewfinderCircleIcon
         @click="openSettings"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"
       />
-      <Navigation class="fixed z-1000" />
+      <Navigation class="fixed z-1000" @handle-button="handleClickNavigation" />
     </div>
   </main>
 </template>

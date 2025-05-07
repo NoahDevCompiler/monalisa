@@ -35,7 +35,9 @@ pub fn run() {
             fs_manager::create_folder,
             fs_manager::create_md_file,
             fs_manager::read_directory,
-            fs_manager::read_file
+            fs_manager::read_file,
+            fs_manager::write_file,
+            fs_manager::get_cards
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

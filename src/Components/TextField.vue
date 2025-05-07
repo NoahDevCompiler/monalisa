@@ -1,19 +1,30 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, defineProps, defineEmits } from "vue";
+import { ref, watch, onMounted, defineProps, defineEmits, nextTick } from "vue";
 import { Editor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import Focus from "@tiptap/extension-focus";
 import Heading from "@tiptap/extension-heading";
 import Paragraph from "@tiptap/extension-paragraph";
 import CodeBlock from "@tiptap/extension-code-block";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Image from "@tiptap/extension-image";
 
-const props = defineProps({
-  content: String,
-});
-const emit = defineEmits(["update:content"]);
+const props = defineProps<{
+  content: String;
+}>();
+const emit = defineEmits(["update:modelValue"]);
+const defaultView = ref(false);
 
 const content = ref(props.content);
+
 const editor = ref<Editor | null>(null);
+
+const handleImageInput = () => {
+  
+  editor.value?.commands.setImage({
+    src: "../../public/monalisalogo.png",
+  });
+};
 
 onMounted(() => {
   editor.value = new Editor({
@@ -35,18 +46,24 @@ onMounted(() => {
       }),
       Paragraph,
       CodeBlock,
+      Image,
+      Dropcursor,
     ],
     onUpdate: ({ editor }) => {
-      emit("update:content", editor.getHTML());
+      console.log("Content on Update", editor.getHTML());
+      emit("update:modelValue", editor.getHTML());
     },
   });
-  console.log("text content", content.value);
+  console.log("text content on load:", content.value);
 });
 
 watch(
   () => props.content,
-  (newContent) => {
+  async (newContent) => {
+    console.log("watch texteditor ausgelöst");
+    await nextTick();
     if (editor.value && newContent !== editor.value.getHTML()) {
+      console.log("editor value gesetzt", editor.value);
       editor.value.commands.setContent(newContent || "", false);
     }
   }
@@ -62,6 +79,10 @@ watch(
           class="editor-content font-quickSand tiptap"
         />
       </div>
+      <div
+        @click="handleImageInput"
+        class="fixed flex top-[6px] w-[10vh] justify-center items-center align-middle left-1 rounded-md bg-indigo-500 hover:opacity-50 font-quickSand whitespace-nowrap text-xs"
+      >Add Charts</div>
     </el-scrollbar>
   </div>
 </template>

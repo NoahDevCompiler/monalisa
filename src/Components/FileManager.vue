@@ -49,7 +49,6 @@ const handleNodeClick = (data: TreeNode) => {
 
   if (data.type == "file") {
     emit("file-selected", data.path);
-    info(data.path);
   }
 };
 
