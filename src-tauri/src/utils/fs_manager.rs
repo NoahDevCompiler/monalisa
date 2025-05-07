@@ -156,8 +156,14 @@ pub fn read_file(path: PathBuf) -> Result<String, VaultError> {
 
 #[tauri::command]
 pub fn write_file(path: PathBuf, content: String) -> Result<(), VaultError> {
+<<<<<<< HEAD
     let _ = fs::write(&path, content).map_err(|_e| VaultError::PermissionDenied { path: path });
     return Ok(());
+=======
+
+    let _ = fs::write(&path, content).map_err(|_e| VaultError::PermissionDenied { path: path });
+    return Ok(())
+>>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
 }
 
 //#[tauri::command]

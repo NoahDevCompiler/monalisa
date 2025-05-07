@@ -50,7 +50,11 @@ onMounted(() => {
       Dropcursor,
     ],
     onUpdate: ({ editor }) => {
+<<<<<<< HEAD
       console.log("Content on Update", editor.getHTML());
+=======
+      console.log("Content on Update", editor.getHTML())
+>>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
       emit("update:modelValue", editor.getHTML());
     },
   });
@@ -60,10 +64,17 @@ onMounted(() => {
 watch(
   () => props.content,
   async (newContent) => {
+<<<<<<< HEAD
     console.log("watch texteditor ausgelöst");
     await nextTick();
     if (editor.value && newContent !== editor.value.getHTML()) {
       console.log("editor value gesetzt", editor.value);
+=======
+    console.log("watch texteditor ausgelöst")
+    await nextTick();
+    if (editor.value && newContent !== editor.value.getHTML()) {
+      console.log("editor value gesetzt", editor.value)
+>>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
       editor.value.commands.setContent(newContent || "", false);
     }
   }
@@ -76,7 +87,7 @@ watch(
       <div class="editor-wrapper">
         <EditorContent
           :editor="editor"
-          class="editor-content font-quickSand tiptap"
+          class="editor-content font-quickSand tiptap" 
         />
       </div>
       <div

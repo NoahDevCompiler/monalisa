@@ -36,8 +36,12 @@ pub fn run() {
             fs_manager::create_md_file,
             fs_manager::read_directory,
             fs_manager::read_file,
+<<<<<<< HEAD
             fs_manager::write_file,
             fs_manager::get_cards
+=======
+            fs_manager::write_file
+>>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
