@@ -1,4 +1,4 @@
-const API_KEY = "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";
+const API_KEY = "";
 
 export async function callOpenAI(userText: string) {
     const prompt = "Strukturiere den folgenden Text klar. Verwende nur HTML Syntax für die Header, Listen und Text Formatierung und keine anderen Formate. Füge passende Ergänzungen hinzu, KEINE Einleitung"
