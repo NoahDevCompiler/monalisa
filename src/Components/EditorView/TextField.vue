@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, defineProps, defineEmits, nextTick } from "vue";
-import { Editor, EditorContent } from "@tiptap/vue-3";
+import { BubbleMenu, Editor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import Focus from "@tiptap/extension-focus";
 import Heading from "@tiptap/extension-heading";
@@ -8,19 +8,20 @@ import Paragraph from "@tiptap/extension-paragraph";
 import CodeBlock from "@tiptap/extension-code-block";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Image from "@tiptap/extension-image";
+import Highlight from "@tiptap/extension-highlight";
+import { Node, mergeAttributes } from "@tiptap/core";
+import SideBar from "./SideBar.vue";
 
 const props = defineProps<{
   content: String;
+  isLoading: boolean;
 }>();
 const emit = defineEmits(["update:modelValue"]);
-const defaultView = ref(false);
 
 const content = ref(props.content);
-
 const editor = ref<Editor | null>(null);
 
 const handleImageInput = () => {
-  
   editor.value?.commands.setImage({
     src: "../../public/monalisalogo.png",
   });
@@ -48,13 +49,10 @@ onMounted(() => {
       CodeBlock,
       Image,
       Dropcursor,
+      Highlight.configure({ multicolor: true }),
     ],
     onUpdate: ({ editor }) => {
-<<<<<<< HEAD
       console.log("Content on Update", editor.getHTML());
-=======
-      console.log("Content on Update", editor.getHTML())
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
       emit("update:modelValue", editor.getHTML());
     },
   });
@@ -64,17 +62,10 @@ onMounted(() => {
 watch(
   () => props.content,
   async (newContent) => {
-<<<<<<< HEAD
     console.log("watch texteditor ausgelöst");
     await nextTick();
     if (editor.value && newContent !== editor.value.getHTML()) {
       console.log("editor value gesetzt", editor.value);
-=======
-    console.log("watch texteditor ausgelöst")
-    await nextTick();
-    if (editor.value && newContent !== editor.value.getHTML()) {
-      console.log("editor value gesetzt", editor.value)
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
       editor.value.commands.setContent(newContent || "", false);
     }
   }
@@ -83,17 +74,56 @@ watch(
 
 <template>
   <div class="editor-container">
+    <SideBar />
     <el-scrollbar class="scroll-container">
+      <div
+        v-if="isLoading"
+        class="animate-gradient-x bg-gradient-to-r w-screen fixed from-blue-500 via-purple-500 to-violet-500 h-[3px] rounded-full dark:bg-blue-500"
+        style="width: 100%"
+      ></div>
+
       <div class="editor-wrapper">
         <EditorContent
           :editor="editor"
-          class="editor-content font-quickSand tiptap" 
+          class="editor-content font-quickSand tiptap"
         />
       </div>
+
+      <bubble-menu
+        :editor="editor"
+        :tippy-options="{ duration: 100 }"
+        v-if="editor"
+      >
+        <div class="bubble-menu">
+          <button
+            class="font-quickSand"
+            @click="editor.chain().focus().toggleBold().run()"
+            :class="{ 'is-active': editor.isActive('bold') }"
+          >
+            Bold
+          </button>
+          <button
+            class="font-quickSand"
+            @click="editor.chain().focus().toggleItalic().run()"
+            :class="{ 'is-active': editor.isActive('italic') }"
+          >
+            Italic
+          </button>
+          <button
+            class="font-quickSand"
+            @click="HandleOpenAI"
+            :class="{ 'is-active': editor.isActive('strike') }"
+          >
+            Strike
+          </button>
+        </div>
+      </bubble-menu>
       <div
         @click="handleImageInput"
         class="fixed flex top-[6px] w-[10vh] justify-center items-center align-middle left-1 rounded-md bg-indigo-500 hover:opacity-50 font-quickSand whitespace-nowrap text-xs"
-      >Add Charts</div>
+      >
+        Add Charts
+      </div>
     </el-scrollbar>
   </div>
 </template>
@@ -151,8 +181,34 @@ watch(
   color: inherit;
   font-size: 0.8rem;
 }
+.tiptap mark {
+  border-radius: 0.4rem;
+}
 
 .cm-scroller {
   overflow: hidden !important;
+}
+
+.bubble-menu {
+  background-color: white;
+  border: 1px solid var(--gray-1);
+  border-radius: 0.7rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.3rem 1rem;
+}
+.bubble-menu button {
+  background: white;
+  color: black;
+  border: none;
+  padding: 0.4rem 0.8rem; /* Mehr Platz im Button */
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.bubble-menu button:hover {
+  background-color: gray;
 }
 </style>

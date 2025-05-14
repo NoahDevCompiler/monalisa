@@ -19,6 +19,11 @@ const isSaving = ref(false);
 
 const emit = defineEmits(["file-selected"]);
 
+async function getVault() {
+  let state = await invoke('get_active_vault_path')
+  console.log(state)
+}
+
 type TreeNode = {
   id: number;
   label: string;
@@ -43,6 +48,7 @@ function allowDrop(draggingNode: any, dropNode: any, type: string) {
 onMounted(() => {
   read_dir();
 });
+
 
 const handleNodeClick = (data: TreeNode) => {
   selectedNode.value = data;
@@ -88,6 +94,7 @@ const focusInput = async (id: number) => {
 };
 
 async function addFolder() {
+  getVault()
   const parent =
     selectedNode.value?.type === "folder"
       ? selectedNode.value.children

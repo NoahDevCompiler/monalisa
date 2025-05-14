@@ -5,13 +5,10 @@ import VaultTab from "./Components/VaultTab.vue";
 
 const appWindow = getCurrentWindow();
 
-const closeWindow = () => {
-  info("called");
-  appWindow.close();
+const closeWindow = async () => {
+  console.log("close Request")
+  await appWindow.close();
 };
-
-import { ref } from "vue";
-import type { TabsInstance } from "element-plus";
 
 const tabPosition = "left";
 </script>
@@ -21,10 +18,9 @@ const tabPosition = "left";
     <div class="window-content h-full">
       <el-tabs
         :tab-position="tabPosition"
-
         class="settings-tabs h-full flex-shrink-0"
       >
-        <el-tab-pane label="Vaults"><VaultTab/></el-tab-pane>
+        <el-tab-pane label="Vaults"><VaultTab @closeWindow="closeWindow"/></el-tab-pane>
         <el-tab-pane label="Config">Config</el-tab-pane>
         <el-tab-pane label="Role">Role</el-tab-pane>
         <el-tab-pane label="Task">Task</el-tab-pane>

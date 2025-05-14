@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use serde::Serialize;
+use std::path::PathBuf;
 
 #[derive(Serialize, Clone)]
 pub struct DirEntry {

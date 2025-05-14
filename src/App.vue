@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { getCurrentWindow } from "@tauri-apps/api/window";
-<<<<<<< HEAD
 import { ref, onBeforeUnmount, onMounted, watch, nextTick } from "vue";
-=======
-import { ref, onBeforeUnmount, onMounted, watch } from "vue";
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import {
   MinusIcon,
   StopIcon,
@@ -15,7 +11,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import Navigation from "./Components/Navigation.vue";
 import SidebarContent from "./Components/FileManager.vue";
-import TextField from "./Components/TextField.vue";
+import TextField from "./Components/EditorView/TextField.vue";
 import { openSettingsWindow } from "./utils/windows";
 import { info } from "@tauri-apps/plugin-log";
 import learncards from "./assets/learncards.png";
@@ -23,27 +19,23 @@ import Header from "./Components/Header.vue";
 import TabManager from "./Components/TabManager.vue";
 import Charts from "./Components/Charts.vue";
 import { callOpenAI } from "./api/ai-api.ts";
+import { Vault, AppConfig } from "./types/VaultType.ts"
 
 const appWindow = getCurrentWindow();
-<<<<<<< HEAD
 const selectedFilePath = ref<string>("");
 const loadContent = ref("");
 const updateContent = ref("");
 const isSaving = ref(false);
 const showCards = ref(false);
-=======
-const selectedFilePath = ref(null);
-const loadContent = ref("");
-const updateContent = ref("");
-const isSaving = ref(false);
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
+const isLoading = ref(false)
 
 onMounted(() => {
+  ensureDefault()
   //listen SubWindow
   listen("tauri://destroyed", (event) => {
     settingsOpen.value = false;
   });
-  //Watch Dragging Window
+
   const titlebar = document.getElementById("toolbar");
 
   if (titlebar) {
@@ -68,7 +60,14 @@ onMounted(() => {
   }
 });
 
-<<<<<<< HEAD
+async function ensureDefault() {
+  const config = await invoke<AppConfig>("get_config");
+  if (!config.vaults.length) {
+    openSettings()
+  }
+  else return
+}
+
 async function handleFileSelected(newPath: any) {
   if (isSaving.value) return;
   const currentPath = selectedFilePath.value;
@@ -98,7 +97,6 @@ document.addEventListener("keydown", async (e) => {
   if (e.ctrlKey && e.key === "s") {
     e.preventDefault();
     await saveFile(selectedFilePath.value);
-    console.log("CTRL + S");
   }
 });
 
@@ -109,6 +107,7 @@ watch(
     const currentContent = updateContent.value
     setTimeout(async function () {
       await saveFile(currentPath, currentContent);
+      console.log("Watch Content to Save")
     }, 1000);
   }
 );
@@ -127,60 +126,24 @@ const handleClickNavigation = (index) => {
     showCards.value = true;
   }
   if (index == 1) {
+    isLoading.value = true
     console.log(updateContent.value);
     callOpenAI(updateContent.value)
-      .then((response: string) => {
+      .then((response: string | undefined) => {
+        if(!response) return;
+        
         loadContent.value = response;
         console.log("ai response", response);
         console.log("new Content for TextEditor", loadContent);
+        console.log("Error in .then")
+        isLoading.value = false;
       })
       .catch((e: string) => {
-        console.log(e);
+        console.log( e);
+
       });
   }
 };
-=======
-async function handleFileSelected(path: any) {
-  //if (updateContent.value !== null && selectedFilePath !== path) {
-  //  await saveFile();
-  //}
-  //updateContent.value = "";
-  selectedFilePath.value = path;
-  loadContent.value = await invoke("read_file", { path: path });
-}
-
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 's') {
-    
-    e.preventDefault();
-    saveFile();
-    console.log('CTRL + S');
-  }
-});
-
-//function debounce(fn: Function, delay: number) {
-//  let timeout: ReturnType<typeof setTimeout>;
-//  return (...args: any[]) => {
-//    clearTimeout(timeout);
-//    timeout = setTimeout(() => fn(...args), delay);
-//  };
-//}
-//const debouncedSave = debounce(saveFile, 2000);
-//
-async function saveFile() {
-  if (isSaving.value || !selectedFilePath.value) return;
-  isSaving.value = true;
-  await invoke("write_file", {
-    path: selectedFilePath.value,
-    content: updateContent.value,
-  });
-  console.log("Saved file with content", updateContent.value);
-  isSaving.value = false;
-}
-//watch(updateContent, (newContent) => {
-//  debouncedSave();
-//});
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
 
 const sidebarWidth = ref(300);
 let isResizing = false;
@@ -256,18 +219,13 @@ const openSettings = async () => {
 
     <div class="main-content relative flex flex-col">
       <TextField
-<<<<<<< HEAD
         v-if="!showCards"
-=======
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
         :content="loadContent"
+        :is-loading="isLoading"
         v-model="updateContent"
         class="absolute inset-0"
       />
-<<<<<<< HEAD
       <Charts v-else class="absolute inset-0"></Charts>
-=======
->>>>>>> a1c51f146ddd533656bc92b4961c423d8e7b0598
       <ViewfinderCircleIcon
         @click="openSettings"
         class="size-9 flex fixed m-2 bottom-0 left-0 text-white"

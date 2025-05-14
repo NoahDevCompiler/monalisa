@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+use serde_json::Error as SerdeJsonError;
 use std::path::PathBuf;
 use tauri::ipc::InvokeError;
 use thiserror::Error;
@@ -20,7 +22,7 @@ pub enum VaultError {
     NotADirectory(PathBuf),
 
     #[error("JSON error: {0}")]
-    Json(#[from] serde_json::Error),
+    Json(String),
 
     #[error("Path resolution error: {0}")]
     PathResolution(String),
@@ -38,6 +40,11 @@ pub enum VaultError {
 impl<T> From<std::sync::PoisonError<T>> for VaultError {
     fn from(error: std::sync::PoisonError<T>) -> Self {
         VaultError::LockError(error.to_string())
+    }
+}
+impl From<SerdeJsonError> for VaultError {
+    fn from(err: SerdeJsonError) -> Self {
+        VaultError::Json(err.to_string())
     }
 }
 

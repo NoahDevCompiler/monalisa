@@ -1,17 +1,4 @@
-#![allow(dead_code)]
-use std::sync::{Arc, Mutex};
+use crate::config::manager::AppConfig;
+use std::sync::Mutex;
 
-#[derive(Default)]
-pub struct AppState {
-    current_vault: Mutex<String>
-}
-
-pub type SharedState = Arc<Mutex<AppState>>;
-
-impl AppState {
-    pub fn new() -> Self {
-        Self {
-            current_vault: SharedState::new(Arc<Mutex<AppState>)
-        }
-    }
-}
+pub struct ConfigState(pub Mutex<AppConfig>);

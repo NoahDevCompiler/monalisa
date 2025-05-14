@@ -26,17 +26,18 @@ export async function openSettingsWindow() {
 
     settingsWindow.once('tauri://created', () => {
         console.log('Settings window created');
-      });
-    
-      settingsWindow.once('tauri://error', (error) => {
+    });
+
+    settingsWindow.once('tauri://error', (error) => {
         console.error('Error creating settings window', {
             message: error?.event,
             stack: error?.id,
             payload: error.payload
         });
-      });
-    
-      settingsWindow.once('tauri://close-requested', () => {
+    });
+
+    settingsWindow.once('close', () => {
+        console.log("Settings window closed");
         settingsWindow = null;
-      });
+    });
 }
