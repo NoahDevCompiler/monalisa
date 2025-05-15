@@ -20,6 +20,9 @@ import TabManager from "./Components/TabManager.vue";
 import Charts from "./Components/Charts.vue";
 import { callOpenAI } from "./api/ai-api.ts";
 import { Vault, AppConfig } from "./types/VaultType.ts"
+import {inject} from "vue"
+
+const store = inject("store");
 
 const appWindow = getCurrentWindow();
 const selectedFilePath = ref<string>("");
@@ -32,10 +35,10 @@ const isLoading = ref(false)
 onMounted(() => {
   ensureDefault()
   //listen SubWindow
+  console.log("store", store.state)
   listen("tauri://destroyed", (event) => {
     settingsOpen.value = false;
   });
-
   const titlebar = document.getElementById("toolbar");
 
   if (titlebar) {

@@ -5,7 +5,7 @@ mod models;
 mod state;
 mod utils;
 use config::commands::{get_config, set_active_vault};
-use config::manager::{load_config, save_config};
+use config::manager::{load_config, init_config, config_add_vault};
 use initial::init_app_dirs;
 use state::ConfigState;
 pub mod errors;
@@ -44,7 +44,7 @@ pub fn run() {
                 Ok(config) => config,
                 Err(_) => {
                     let default = AppConfig::default();
-                    save_config(&default, app_handle.clone());
+                    init_config(&app_handle);
                     default
                 }
             };
@@ -67,7 +67,8 @@ pub fn run() {
             fs_manager::write_file,
             fs_manager::get_cards,
             fs_manager::create_vault,
-            config::commands::get_active_vault_path
+            config::commands::get_active_vault_path,
+            config_add_vault
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

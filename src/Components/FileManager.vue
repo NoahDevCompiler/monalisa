@@ -46,6 +46,7 @@ function allowDrop(draggingNode: any, dropNode: any, type: string) {
   return dropNode.data.type == "folder";
 }
 onMounted(() => {
+  getVault();
   read_dir();
 });
 
@@ -94,7 +95,6 @@ const focusInput = async (id: number) => {
 };
 
 async function addFolder() {
-  getVault()
   const parent =
     selectedNode.value?.type === "folder"
       ? selectedNode.value.children

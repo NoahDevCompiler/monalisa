@@ -25,6 +25,7 @@ async function selectVaultFolder() {
   if (selected) {
     console.log("selected path:", selected);
     await invoke("set_active_vault", { path: selected });
+    await invoke("config_add_vault", {path})
     emit('closeWindow', true)
   }
 }
@@ -42,8 +43,18 @@ async function selectVaultFolder() {
       >
         Open Vault
       </div>
-      <div class="rounded-lg bg-[#A69888] w-[300px] h-11"></div>
-      <div class="rounded-lg bg-[#A69888] w-[300px] h-11"></div>
+      <div
+        @click="createVault"
+        class="rounded-lg bg-[#a69888] w-[300px] justify-center items-center transition-shadow flex h-11 hover:shadow-lg hover:shadow-[#766c60] text-white text-[20px] tracking-widest font-quickSand"
+      >
+        Create Default Vault
+      </div>
+      <div
+        @click="selectVaultFolder"
+        class="rounded-lg bg-[#a69888] w-[300px] justify-center items-center transition-shadow flex h-11 hover:shadow-lg hover:shadow-[#766c60] text-white text-[20px] tracking-widest font-quickSand"
+      >
+        Delete Vaults
+      </div>
     </div>
   </div>
 </template>
